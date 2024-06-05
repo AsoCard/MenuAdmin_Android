@@ -26,7 +26,13 @@ android {
     }
 
     buildTypes {
+        debug {
+
+            buildConfigField("String", "BASE_URL", "\"https://api.420coffee.ir/\"")
+        }
         release {
+            buildConfigField("String", "BASE_URL", "\"https://api.420coffee.ir/\"")
+
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -42,6 +48,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        android.buildFeatures.buildConfig = true
         compose = true
     }
     composeOptions {
@@ -68,7 +75,15 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    //data store
+    implementation(libs.androidx.datastore)
+    implementation(libs.datastore.preferences)
+    //ksp
+    implementation(libs.ksp.symbol.processing)
 
     // Retrofit
     implementation(libs.retrofit)
