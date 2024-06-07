@@ -20,7 +20,7 @@ object MainDestinations {
     const val RECIPE_ROUTE = "recipe"
     const val ADD_MENU_ITEM_ROUTE = "add_menu_item"
     const val MENU_ITEM_ROUTE = "menu_item"
-    const val MENU_ITEM_LIST_ROUTE = "menu_item_list"
+    const val MENU_LIST_ROUTE = "menu_list"
     const val ADD_MENU_CATEGORY_ROUTE= "menu_category"
 
 }
@@ -29,7 +29,7 @@ object MainDestinations {
  * Remembers and creates an instance of [EZCallNavController]
  */
 @Composable
-fun rememberEZCallNavController(
+fun rememberMyNavController(
     navController: NavHostController = rememberNavController(),
 ): EZCallNavController = remember(navController) {
     EZCallNavController(navController)

@@ -1,9 +1,9 @@
 package com.aso.asomenuadmin.state
 
-import com.aso.asomenuadmin.model.MenuItem
+import com.aso.asomenuadmin.model.Product
 
 data class MenuUiState(
     val isLoading: Boolean = false,
-    val data: List<MenuItem> = emptyList(),
+    val data: List<Product> = emptyList(),
     val error: String? = null,
 )

@@ -2,7 +2,7 @@ package com.ezcall.data.dataSource.remote.entities
 
 import com.google.gson.annotations.SerializedName
 
-data class AuthSignUp(
+data class SignUpRequest(
     val email: String,
     @SerializedName("phone_number")
     val phoneNumber: String,

@@ -71,19 +71,30 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.runtime.ktx)
 
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     //data store
     implementation(libs.androidx.datastore)
     implementation(libs.datastore.preferences)
+
+    //timber
+    implementation(libs.timber)
+
     //ksp
     implementation(libs.ksp.symbol.processing)
+
+    //coil
+    implementation(libs.coil.compose)
+
+    //zelory compresor
+    implementation(libs.zelory.compressor)
 
     // Retrofit
     implementation(libs.retrofit)

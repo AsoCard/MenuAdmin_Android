@@ -1,10 +1,9 @@
 package com.aso.asomenuadmin.intent
 
-import android.view.Menu
-import com.aso.asomenuadmin.model.MenuItem
+import com.aso.asomenuadmin.model.Product
 
 sealed class MenuScreenIntent {
     object LoadData : MenuScreenIntent()
-    data class DataLoaded(val data: List<MenuItem>) : MenuScreenIntent()
+    data class DataLoaded(val data: List<Product>) : MenuScreenIntent()
     data class Error(val error: String) : MenuScreenIntent()
 }

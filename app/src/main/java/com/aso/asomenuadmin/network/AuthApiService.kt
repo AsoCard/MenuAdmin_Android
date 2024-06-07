@@ -1,7 +1,7 @@
 package com.aso.asomenuadmin.network
 
-import com.aso.asomenuadmin.network.entities.AuthLogin
-import com.ezcall.data.dataSource.remote.entities.AuthSignUp
+import com.aso.asomenuadmin.network.entities.LoginRequest
+import com.ezcall.data.dataSource.remote.entities.SignUpRequest
 import com.ezcall.data.dataSource.remote.entities.LoginResponse
 import com.ezcall.data.dataSource.remote.entities.SignUpResponse
 import com.ezcall.data.dataSource.remote.entities.TokenVerify
@@ -12,10 +12,10 @@ import retrofit2.http.POST
 
 interface AuthApiService {
     @POST("auth/login/")
-    suspend fun loginUser(@Body authLogin: AuthLogin): Response<LoginResponse>
+    suspend fun loginUser(@Body authLogin: LoginRequest): Response<LoginResponse>
 
     @POST("users/register/")
-    suspend fun signUpUser(@Body authSignUp: AuthSignUp): Response<SignUpResponse>
+    suspend fun signUpUser(@Body authSignUp: SignUpRequest): Response<SignUpResponse>
 
     @POST("auth/verify/")
     suspend fun verifyToken(@Body token: TokenVerify): Response<LoginResponse>
