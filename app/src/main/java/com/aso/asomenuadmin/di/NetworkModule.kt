@@ -56,6 +56,7 @@ object NetworkModule {
     fun provideRetrofitBuilder(okHttpClient: OkHttpClient): Retrofit.Builder {
         // Create Retrofit instance with your base URL and OkHttpClient
         return Retrofit.Builder()
+            .client(okHttpClient)
             .baseUrl(BuildConfig.BASE_URL) // Replace with your API base URL
             .addConverterFactory(GsonConverterFactory.create())
     }

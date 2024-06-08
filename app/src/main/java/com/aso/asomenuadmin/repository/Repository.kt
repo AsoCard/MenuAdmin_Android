@@ -1,20 +1,43 @@
 package com.aso.asomenuadmin.repository
 
-import com.aso.asomenuadmin.model.Product
+import com.aso.asomenuadmin.model.OrderResponse
+import com.aso.asomenuadmin.model.Recipe
+import com.aso.asomenuadmin.network.ApiService
+import com.aso.asomenuadmin.network.apiRequestFlow
+import com.aso.asomenuadmin.network.entities.ApiState
+import com.aso.asomenuadmin.network.entities.LoginRequest
+import com.aso.asomenuadmin.network.entities.LoginResponse
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 interface Repository {
-    suspend fun fetchData(): List<Product>
+    //    suspend fun fetchData(): List<Product>
+    fun login(email: String, password: String): Flow<ApiState<LoginResponse>>
+    suspend fun getRecipe(productId: Int): Flow<ApiState<Recipe>>
+
+    suspend fun getOrders(orderStatus: Int): Flow<ApiState<OrderResponse>>
+
 }
 
-//class RepositoryImpl @Inject constructor(
-//    private val apiService: ApiService
-//) : Repository {
-//    override suspend fun fetchData(): List<Product> {
-//        val response = apiService.getBartenderOrders()
-//        if (response.isSuccessful) {
-//            return response.body() ?: emptyList()
-//        } else {
-//            throw Exception("Failed to load data")
-//        }
-//    }
-//}
+class RepositoryImpl @Inject constructor(
+    private val apiService: ApiService
+) : Repository {
+    override fun login(email: String, password: String): Flow<ApiState<LoginResponse>> {
+        return apiRequestFlow {
+            apiService.login(LoginRequest(email, password))
+        }
+    }
+
+    override suspend fun getRecipe(productId: Int): Flow<ApiState<Recipe>> {
+        return apiRequestFlow {
+            apiService.getRecipe(productId)
+        }
+    }
+
+    override suspend fun getOrders(orderStatus: Int): Flow<ApiState<OrderResponse>> {
+        return apiRequestFlow {
+            apiService.getOrders(orderStatus)
+        }
+
+    }
+}

@@ -22,6 +22,7 @@ fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiState<T>> = flo
                 }
             } else {
                 response.errorBody()?.let { error ->
+                    Timber.e(error.string())
                     error.close()
                     val parsedError: ErrorResponse =
                         Gson().fromJson(error.charStream(), ErrorResponse::class.java)

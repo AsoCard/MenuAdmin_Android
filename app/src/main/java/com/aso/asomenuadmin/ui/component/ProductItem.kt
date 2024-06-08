@@ -1,3 +1,4 @@
+
 package com.aso.asomenuadmin.ui.component
 
 import androidx.compose.foundation.Image
@@ -18,8 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.aso.asomenuadmin.R
 import com.aso.asomenuadmin.model.Product
 
 @Composable
@@ -27,13 +31,23 @@ fun ProductItem(
     product: Product,
     onRecipeClick: (String) -> Unit
 ) {
+    val imageUrl = product.images.firstOrNull()?.image
+
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(imageUrl)
+            .placeholder(R.drawable.orders)
+            .error(R.drawable.category)
+            .fallback(R.drawable.history)
+            .build()
+    )
     Row(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
     ) {
         Image(
-            painter = rememberAsyncImagePainter(model = product.images.get(0).image),
+            painter = painter,
             contentDescription = null,
             modifier = Modifier
                 .size(64.dp)

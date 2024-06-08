@@ -3,8 +3,8 @@ package com.aso.asomenuadmin.di
 import android.content.Context
 import com.aso.asomenuadmin.network.ApiService
 import com.aso.asomenuadmin.repository.ImageRepository
-import com.aso.asomenuadmin.repository.RecipeRepository
-import com.aso.asomenuadmin.repository.RecipeRepositoryImpl
+import com.aso.asomenuadmin.repository.Repository
+import com.aso.asomenuadmin.repository.RepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,10 +23,11 @@ class RepositoryModule {
         return ImageRepository(context)
     }
 
+
     @Singleton
     @Provides
-    fun provideRecipeRepository(api: ApiService): RecipeRepository {
-        return RecipeRepositoryImpl(api)
+    fun provideRepository(api: ApiService): Repository {
+        return RepositoryImpl(api)
     }
 
     @Singleton

@@ -15,7 +15,7 @@ class TokenManager(private val context: Context) {
 
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("jwt_token")
-        private val REFRESH_TOKEN_KEY = stringPreferencesKey("jwt_token")
+        private val REFRESH_TOKEN_KEY = stringPreferencesKey("jwt_token_refresh")
     }
 
     suspend fun deleteToken() {

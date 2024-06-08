@@ -3,7 +3,7 @@ package com.aso.asomenuadmin.network
 
 import com.aso.asomenuadmin.BuildConfig
 import com.aso.asomenuadmin.network.token.TokenManager
-import com.ezcall.data.dataSource.remote.entities.LoginResponse
+import com.aso.asomenuadmin.network.entities.LoginResponse
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
@@ -33,9 +33,9 @@ class AuthAuthenticator @Inject constructor(
             }
 
             newToken.body()?.let {
-                tokenManager.saveToken(it.accessToken)
+                tokenManager.saveToken(it.result.access)
                 response.request.newBuilder()
-                    .header("Authorization", "Bearer ${it.accessToken}")
+                    .header("Authorization", "Bearer ${it.result.access}")
                     .build()
             }
         }

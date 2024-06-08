@@ -2,11 +2,13 @@ package com.aso.asomenuadmin.ui.screens.recipe
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aso.asomenuadmin.repository.RecipeRepository
+import com.aso.asomenuadmin.network.entities.ApiState
+import com.aso.asomenuadmin.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 data class RecipeState(
@@ -23,7 +25,7 @@ sealed class RecipeIntent {
 
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
-    private val repository: RecipeRepository
+    private val repository: Repository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RecipeState())
@@ -37,14 +39,32 @@ class RecipeViewModel @Inject constructor(
 
     private fun loadRecipe(productId: Int) {
         viewModelScope.launch {
-            val recipe = repository.getRecipe(productId)
-            _state.value = RecipeState(
-                title = recipe.title,
-                ingredients = recipe.ingredients,
-                steps = recipe.steps,
-                imageUrl = recipe.imageUrl,
-                videoUrl = recipe.videoUrl
-            )
+            val recipe = repository.getRecipe(productId).collect {
+                when (it) {
+                    is ApiState.Success -> {
+                        _state.value = RecipeState(
+                            title = it.data.title,
+                            ingredients = it.data.ingredients,
+                            steps = it.data.steps,
+                            imageUrl = it.data.imageUrl,
+                            videoUrl = it.data.videoUrl
+                        )
+                    }
+
+                    is ApiState.Failure -> {
+                        Timber.i(
+                            it.errorMessage
+                        )
+                    }
+
+                    ApiState.Idle -> TODO()
+                    ApiState.Loading -> Timber.i(
+                        "Loading"
+                    )
+                }
+
+            }
+
         }
     }
 }
