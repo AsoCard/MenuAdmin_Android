@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -47,7 +49,7 @@ fun DrawerScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp).verticalScroll(rememberScrollState())
         ) {
 
             Row(
@@ -60,7 +62,7 @@ fun DrawerScreen(
                     imageVector = ImageVector.vectorResource(id = R.drawable.menu),
                     contentDescription = "logo",
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(90.dp)
                         .align(Alignment.CenterVertically)
                 )
 

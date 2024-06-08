@@ -20,7 +20,7 @@ data class RecipeState(
 )
 
 sealed class RecipeIntent {
-    data class LoadRecipe(val productId: Int) : RecipeIntent()
+    data class LoadRecipe(val productId: Long) : RecipeIntent()
 }
 
 @HiltViewModel
@@ -37,34 +37,28 @@ class RecipeViewModel @Inject constructor(
         }
     }
 
-    private fun loadRecipe(productId: Int) {
+    private fun loadRecipe(productId: Long) {
         viewModelScope.launch {
-            val recipe = repository.getRecipe(productId).collect {
-                when (it) {
+            repository.getRecipe(productId).collect { apiState ->
+                when (apiState) {
                     is ApiState.Success -> {
+                        val result = apiState.data
                         _state.value = RecipeState(
-                            title = it.data.title,
-                            ingredients = it.data.ingredients,
-                            steps = it.data.steps,
-                            imageUrl = it.data.imageUrl,
-                            videoUrl = it.data.videoUrl
+                            title = result.title,
+                            ingredients = result.ingredients.split(",").map { it.trim() },
+                            steps = result.steps.split(",").map { it.trim() },
+                            imageUrl = result.img ?: "",
+                            videoUrl = result.video
                         )
+                        Timber.d("Recipe: $result")
                     }
-
                     is ApiState.Failure -> {
-                        Timber.i(
-                            it.errorMessage
-                        )
+                        Timber.i(apiState.errorMessage)
                     }
-
-                    ApiState.Idle -> TODO()
-                    ApiState.Loading -> Timber.i(
-                        "Loading"
-                    )
+                    ApiState.Loading -> Timber.i("Loading")
+                    ApiState.Idle -> Unit // Handle idle state if needed
                 }
-
             }
-
         }
     }
 }

@@ -21,7 +21,11 @@ import com.aso.asomenuadmin.ui.component.TopAppBar
 import kotlinx.coroutines.launch
 
 @Composable
-fun OrdersScreen(drawerState: DrawerState,viewModel: OrdersViewModel= hiltViewModel()) {
+fun OrdersScreen(
+    drawerState: DrawerState,
+    viewModel: OrdersViewModel = hiltViewModel(),
+    onNavigateWithParam: (String, Long) -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val ordersState = viewModel.ordersState.collectAsState()
     var ordersList = emptyList<Order>()
@@ -52,7 +56,7 @@ fun OrdersScreen(drawerState: DrawerState,viewModel: OrdersViewModel= hiltViewMo
             modifier = Modifier.padding(top = 16.dp)
         ) {
             items(ordersList) { orderData ->
-                OrderCard(orderData)
+                OrderCard(orderData,onNavigateWithParam = onNavigateWithParam)
             }
         }
     }

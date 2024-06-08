@@ -3,6 +3,7 @@ package com.aso.asomenuadmin.ui.screens.orders
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aso.asomenuadmin.model.OrderResponse
+import com.aso.asomenuadmin.model.Recipe
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.LoginResponse
 import com.aso.asomenuadmin.network.token.TokenManager
@@ -27,6 +28,9 @@ class OrdersViewModel @Inject constructor(
     val loginState: StateFlow<ApiState<LoginResponse>> = _loginState
 
     private var loginResponse: LoginResponse? = null
+
+//    private val _productRecipeState = MutableStateFlow<ApiState<Recipe>>(ApiState.Idle)
+//    val productRecipeState: StateFlow<ApiState<Recipe>> = _productRecipeState
 
     init {
         login("norouzi8446@gmail.com", "1")
@@ -54,12 +58,43 @@ class OrdersViewModel @Inject constructor(
                         Timber.d("Orders failed: ${apiState.errorMessage}+${apiState.errorCode}")
                     }
 
-                    ApiState.Idle -> Timber.d("Orders idle")
-                    ApiState.Loading -> Timber.d("Orders loading")
+                    ApiState.Idle -> {
+                        _ordersState.value = apiState
+                        Timber.d("Orders idle")
+                    }
+                    ApiState.Loading -> {
+                        _ordersState.value = apiState
+                        Timber.d("Orders loading")
+                    }
                 }
             }
         }
     }
+//     fun getRecipes(productId: Int) {
+//        _ordersState.value = ApiState.Loading
+//        viewModelScope.launch {
+//            repository.getRecipe(productId).collect { apiState ->
+//                when (apiState) {
+//                    is ApiState.Success -> {
+//                        _productRecipeState.value = apiState
+//                        Timber.d("Recipes successful: ${apiState.data}")
+//                    }
+//                    is ApiState.Failure -> {
+//                        _productRecipeState.value = apiState
+//                        Timber.d("Recipes failed: ${apiState.errorMessage}+${apiState.errorCode}")
+//                    }
+//                    ApiState.Idle -> {
+//                        _productRecipeState.value = ApiState.Idle
+//                        Timber.d("Recipes idle")
+//                    }
+//                    ApiState.Loading -> {
+//                        _productRecipeState.value = ApiState.Loading
+//                        Timber.d("Recipes loading")
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun login(email: String, password: String) {
         _loginState.value = ApiState.Loading

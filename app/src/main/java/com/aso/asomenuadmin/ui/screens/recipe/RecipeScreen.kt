@@ -1,12 +1,7 @@
 package com.aso.asomenuadmin.ui.screens.recipe
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,23 +13,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun RecipeScreen(productId: Int, viewModel: RecipeViewModel = hiltViewModel()) {
+fun RecipeScreen(productId: Long, viewModel: RecipeViewModel = hiltViewModel()) {
     LaunchedEffect(productId) {
         viewModel.handleIntent(RecipeIntent.LoadRecipe(productId))
     }
 
     val state by viewModel.state.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
         Text(text = state.title, style = MaterialTheme.typography.bodySmall)
 
         Image(
-            painter = rememberImagePainter(state.imageUrl),
+            painter = rememberAsyncImagePainter(state.imageUrl),
             contentDescription = null,
-            modifier = Modifier.height(200.dp).fillMaxWidth().clip(RoundedCornerShape(8.dp))
+            modifier = Modifier
+                .height(200.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
         )
 
         Spacer(modifier = Modifier.height(16.dp))

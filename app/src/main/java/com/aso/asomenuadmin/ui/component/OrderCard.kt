@@ -9,17 +9,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
 import com.aso.asomenuadmin.model.Order
 import com.aso.asomenuadmin.model.Product
+import com.aso.asomenuadmin.ui.navigation.MainDestinations
+import com.aso.asomenuadmin.ui.screens.orders.OrdersViewModel
 
 @Composable
-fun OrderCard(order: Order, modifier: Modifier = Modifier
+fun OrderCard(
+    order: Order,
+    modifier: Modifier = Modifier,
+    viewModel: OrdersViewModel = hiltViewModel(),
+    onNavigateWithParam: (String, Long) -> Unit
 ) {
     val tableNumber = order.address
     val orderTime = order.createdAt
@@ -50,10 +59,10 @@ fun OrderCard(order: Order, modifier: Modifier = Modifier
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 productItems.forEach { productItem ->
-                    ProductItemRow(productItem = productItem)
-//                Divider(
-//                    modifier = Modifier.padding(vertical = 8.dp)
-//                )
+                    ProductItemRow(productItem = productItem,onNavigateWithParam = onNavigateWithParam)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
                 }
                 Button(onClick = { /*Update Order Status to 4 */ }) {
                     Text(text = "آماده شد!")
@@ -67,7 +76,8 @@ fun OrderCard(order: Order, modifier: Modifier = Modifier
 @Composable
 fun ProductItemRow(
     productItem: Product,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateWithParam: (String, Long) -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -75,8 +85,9 @@ fun ProductItemRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         ProductItem(
-            productItem,
-            onRecipeClick = { }
+            productItem, onRecipeClick = {
+                onNavigateWithParam(MainDestinations.RECIPE_ROUTE, productItem.id.toLong(),)
+            }
         )
 
     }

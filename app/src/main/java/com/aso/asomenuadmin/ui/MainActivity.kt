@@ -24,14 +24,17 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.aso.asomenuadmin.ui.component.DrawerScreen
 import com.aso.asomenuadmin.ui.navigation.MainDestinations
 import com.aso.asomenuadmin.ui.navigation.rememberMyNavController
 import com.aso.asomenuadmin.ui.screens.addMenuItem.AddMenuItemScreen
 import com.aso.asomenuadmin.ui.screens.menu.MenuScreen
 import com.aso.asomenuadmin.ui.screens.orders.OrdersScreen
+import com.aso.asomenuadmin.ui.screens.recipe.RecipeScreen
 import com.aso.asomenuadmin.ui.theme.MenuAdminTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -118,22 +121,39 @@ private fun NavGraphBuilder.myNavGraph(
     composable(
         route = MainDestinations.ORDER_ROUTE,
     ) { backStackEntry ->
-        OrdersScreen(drawerState)
+        OrdersScreen(drawerState, onNavigateWithParam = { route, param ->
+            onNavigateWithParam(
+                route, param, backStackEntry
+            )
+        })
 //        LoginScreen(
 //            onNavigateToSubScreen = onNavigateToAnySubScreen,
 //            backStackEntry = backStackEntry
 //        )
     }
 
-    composable(route = MainDestinations.RECIPE_ROUTE) {
-//        RecipeScreen(productId = )
+    composable(
+        route = "${MainDestinations.RECIPE_ROUTE}/{productId}",
+        arguments = listOf(navArgument("productId") { type = NavType.LongType })
+    ) {
+        composable(
+            route = "${MainDestinations.RECIPE_ROUTE}/{productId}",
+            arguments = listOf(navArgument("productId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getLong("productId") ?: return@composable
+            RecipeScreen(productId)
+        }
     }
 
     composable(route = MainDestinations.MENU_ITEM_ROUTE) {
 
     }
     composable(route = MainDestinations.ORDER_HISTORY_ROUTE) {
-        OrdersScreen(drawerState)
+        OrdersScreen(drawerState, onNavigateWithParam = { route, param ->
+            onNavigateWithParam(
+                route, param, it
+            )
+        })
     }
     composable(route = MainDestinations.ADD_MENU_ITEM_ROUTE) {
         AddMenuItemScreen()

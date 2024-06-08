@@ -13,8 +13,7 @@ import javax.inject.Inject
 interface Repository {
     //    suspend fun fetchData(): List<Product>
     fun login(email: String, password: String): Flow<ApiState<LoginResponse>>
-    suspend fun getRecipe(productId: Int): Flow<ApiState<Recipe>>
-
+    fun getRecipe(productId: Long): Flow<ApiState<Recipe>>
     suspend fun getOrders(orderStatus: Int): Flow<ApiState<OrderResponse>>
 
 }
@@ -28,12 +27,11 @@ class RepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getRecipe(productId: Int): Flow<ApiState<Recipe>> {
+    override fun getRecipe(productId: Long): Flow<ApiState<Recipe>> {
         return apiRequestFlow {
             apiService.getRecipe(productId)
         }
     }
-
     override suspend fun getOrders(orderStatus: Int): Flow<ApiState<OrderResponse>> {
         return apiRequestFlow {
             apiService.getOrders(orderStatus)
