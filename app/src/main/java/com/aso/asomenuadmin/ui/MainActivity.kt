@@ -136,13 +136,8 @@ private fun NavGraphBuilder.myNavGraph(
         route = "${MainDestinations.RECIPE_ROUTE}/{productId}",
         arguments = listOf(navArgument("productId") { type = NavType.LongType })
     ) {
-        composable(
-            route = "${MainDestinations.RECIPE_ROUTE}/{productId}",
-            arguments = listOf(navArgument("productId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val productId = backStackEntry.arguments?.getLong("productId") ?: return@composable
-            RecipeScreen(productId)
-        }
+        val productId = it.arguments?.getLong("productId") ?: return@composable
+        RecipeScreen(productId)
     }
 
     composable(route = MainDestinations.MENU_ITEM_ROUTE) {
