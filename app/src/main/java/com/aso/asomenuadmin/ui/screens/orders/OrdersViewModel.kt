@@ -3,17 +3,14 @@ package com.aso.asomenuadmin.ui.screens.orders
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aso.asomenuadmin.model.OrderResponse
-import com.aso.asomenuadmin.model.Recipe
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.LoginResponse
 import com.aso.asomenuadmin.network.token.TokenManager
 import com.aso.asomenuadmin.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -48,9 +45,28 @@ class OrdersViewModel @Inject constructor(
         }
     }
 
+    fun updateOrderStatus(orderId: Int, orderStatus: Int) {
+        viewModelScope.launch {
+            repository.updateOrderStatus(orderId, orderStatus).collect { apiState ->
+                when (apiState) {
+                    is ApiState.Success -> {
+                        Timber.d("Order status updated successfully")
+                    }
+
+                    is ApiState.Failure -> {
+                        Timber.d("Order status update failed: ${apiState.errorMessage}")
+                    }
+
+                    ApiState.Idle -> Timber.d("Order status update Idle")
+                    ApiState.Loading -> Timber.d("Order status update Loading")
+                }
+            }
+        }
+    }
+
      fun getOrders() {
         viewModelScope.launch {
-            repository.getOrders(orderStatus = 4).collect { apiState ->
+            repository.getOrders(orderStatus = 1).collect { apiState ->
                 when (apiState) {
                     is ApiState.Success -> {
                         val newData = apiState.data

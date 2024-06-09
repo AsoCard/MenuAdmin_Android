@@ -33,10 +33,10 @@ interface ApiService {
     suspend fun getOrders(@Query("status") status: Int): Response<OrderResponse>
 
     @FormUrlEncoded
-    @POST("api/orders/bartender/")
+    @PUT("api/orders/bartender/")
     suspend fun updateOrder(
-        @Field("id") orderId: Int,
-        @Field("status") status: String
+        @Query("id") orderId: Int,
+        @Field("status") status: Int
     ): Response<Any>
 
 //    @POST("/api/orders/create/")

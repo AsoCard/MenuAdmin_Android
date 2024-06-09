@@ -45,12 +45,12 @@ fun DrawerScreen(
         modifier = modifier
             .fillMaxHeight()
             .width(250.dp)
-            .background(MaterialTheme.colorScheme.primary)// Set the width to 200.dp (adjust as needed)
+            .background(MaterialTheme.colorScheme.primary)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp).verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp).verticalScroll(rememberScrollState())
         ) {
 
             Row(
@@ -106,7 +106,7 @@ fun DrawerItem(
         .fillMaxWidth()
         .height(64.dp)
         .clickable { onClick() }
-        .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        .padding(), verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,
             contentDescription = null,

@@ -18,6 +18,7 @@ interface Repository {
     fun login(email: String, password: String): Flow<ApiState<LoginResponse>>
     fun getRecipe(productId: Long): Flow<ApiState<Recipe>>
     suspend fun getOrders(orderStatus: Int): Flow<ApiState<OrderResponse>>
+    suspend fun updateOrderStatus(orderId: Int, orderStatus: Int): Flow<ApiState<Any>>
 
 }
 class RepositoryImpl @Inject constructor(
@@ -46,5 +47,14 @@ class RepositoryImpl @Inject constructor(
         } else {
             flow { emit(ApiState.Failure("No internet connection", -1)) }
         }
+    }
+
+    override suspend fun updateOrderStatus(orderId: Int, orderStatus: Int): Flow<ApiState<Any>> {
+        return if (networkUtil.isNetworkConnected()) {
+            apiRequestFlow { apiService.updateOrder(orderId, orderStatus) }
+        } else {
+            flow { emit(ApiState.Failure("No internet connection", -1)) }
+        }
+
     }
 }
