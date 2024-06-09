@@ -7,6 +7,7 @@ import com.aso.asomenuadmin.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -39,26 +40,46 @@ class RecipeViewModel @Inject constructor(
 
     private fun loadRecipe(productId: Long) {
         viewModelScope.launch {
-            repository.getRecipe(productId).collect { apiState ->
-                when (apiState) {
-                    is ApiState.Success -> {
-                        val result = apiState.data
-                        _state.value = RecipeState(
-                            title = result.title,
-                            ingredients = result.ingredients.split(",").map { it.trim() },
-                            steps = result.steps.split(",").map { it.trim() },
-                            imageUrl = result.img ?: "",
-                            videoUrl = result.video
-                        )
-                        Timber.d("Recipe: $result")
-                    }
-                    is ApiState.Failure -> {
-                        Timber.i(apiState.errorMessage)
-                    }
-                    ApiState.Loading -> Timber.i("Loading")
-                    ApiState.Idle -> Unit // Handle idle state if needed
+            repository.getRecipe(productId)
+                .catch { e ->
+                    Timber.e(e, "Error loading recipe")
+                    // Emit a failure state or handle the error accordingly
+                    // Example of setting an error state:
+                    _state.value = RecipeState(
+                        title = "Error",
+                        ingredients = emptyList(),
+                        steps = emptyList(),
+                        imageUrl = "",
+                        videoUrl = null
+                    )
                 }
-            }
+                .collect { apiState ->
+                    when (apiState) {
+                        is ApiState.Success -> {
+                            val result = apiState.data
+                            _state.value = RecipeState(
+                                title = result.title ?: "",
+                                ingredients = result.ingredients?.split(",")?.map { it.trim() } ?: emptyList(),
+                                steps = result.steps?.split(",")?.map { it.trim() } ?: emptyList(),
+                                imageUrl = result.img ?: "",
+                                videoUrl = result.video
+                            )
+                            Timber.d("Recipe: $result")
+                        }
+                        is ApiState.Failure -> {
+                            Timber.i(apiState.errorMessage)
+                            _state.value = RecipeState(
+                                title = "Error",
+                                ingredients = emptyList(),
+                                steps = emptyList(),
+                                imageUrl = "",
+                                videoUrl = null
+                            )
+                        }
+                        ApiState.Loading -> Timber.i("Loading")
+                        ApiState.Idle -> Unit // Handle idle state if needed
+                    }
+                }
         }
     }
 }
