@@ -1,7 +1,8 @@
 package com.aso.asomenuadmin.repository
 
-import android.content.Context
 import com.aso.asomenuadmin.model.OrderResponse
+import com.aso.asomenuadmin.model.Product
+import com.aso.asomenuadmin.model.ProductResponse
 import com.aso.asomenuadmin.model.Recipe
 import com.aso.asomenuadmin.network.ApiService
 import com.aso.asomenuadmin.network.apiRequestFlow
@@ -20,6 +21,7 @@ interface Repository {
     suspend fun getOrders(orderStatus: Int): Flow<ApiState<OrderResponse>>
     suspend fun updateOrderStatus(orderId: Int, orderStatus: Int): Flow<ApiState<Any>>
 
+    suspend fun getProducts(search: String = ""): Flow<ApiState<ProductResponse>>
 }
 class RepositoryImpl @Inject constructor(
     private val apiService: ApiService,
@@ -56,5 +58,13 @@ class RepositoryImpl @Inject constructor(
             flow { emit(ApiState.Failure("No internet connection", -1)) }
         }
 
+    }
+
+    override suspend fun getProducts(search: String): Flow<ApiState<ProductResponse>> {
+        return if (networkUtil.isNetworkConnected()) {
+            apiRequestFlow { apiService.getProducts(search) }
+        } else {
+            flow { emit(ApiState.Failure("No internet connection", -1)) }
+        }
     }
 }

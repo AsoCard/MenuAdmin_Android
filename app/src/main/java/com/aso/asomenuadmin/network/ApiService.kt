@@ -4,6 +4,7 @@ import com.aso.asomenuadmin.model.Menu
 import com.aso.asomenuadmin.model.Order
 import com.aso.asomenuadmin.model.OrderResponse
 import com.aso.asomenuadmin.model.Product
+import com.aso.asomenuadmin.model.ProductResponse
 import com.aso.asomenuadmin.model.Recipe
 import com.aso.asomenuadmin.network.entities.LoginRequest
 import com.aso.asomenuadmin.network.entities.LoginResponse
@@ -43,16 +44,16 @@ interface ApiService {
 //    suspend fun createOrder(@Body createOrder: CreateOrder): Order
 
     @GET("api/products/")
-    fun getProducts(@Query("search") search: String): Flow<List<Product>>
+    suspend fun getProducts(@Query("search") search: String): Response<ProductResponse>
 
     @GET("api/products/{id}/")
-    fun getProductById(@Path("id") id: Int): Flow<Product>
+    fun getProductById(@Path("id") id: Int): Response<Product>
 
     @PUT("/api/products/{id}/")
-    suspend fun updateProduct(@Path("id") id: Int, @Body product: Product): Product
+    suspend fun updateProduct(@Path("id") id: Int, @Body product: Product):Response<Product>
 
     @PATCH("api/products/{id}/")
-    suspend fun patchProduct(@Path("id") id: Int, @Body product: Product): Product
+    suspend fun patchProduct(@Path("id") id: Int, @Body product: Product): Response<Product>
 
     @DELETE("api/products/{id}/")
     suspend fun deleteProduct(@Path("id") id: Int): Void
