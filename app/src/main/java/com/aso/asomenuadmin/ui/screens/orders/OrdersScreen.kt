@@ -3,9 +3,15 @@ package com.aso.asomenuadmin.ui.screens.orders
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,17 +38,29 @@ fun OrdersScreen(
 
     when (ordersState.value) {
         is ApiState.Loading -> {
-            Text("Loading")
+            IconButton(onClick = { /*TODO*/ }) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            }
         }
 
         is ApiState.Success -> {
             ordersList = (ordersState.value as ApiState.Success<OrderResponse>).data.result
+            IconButton(onClick = { viewModel.getOrders() }) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            }
         }
         is ApiState.Failure -> {
-            Text("Error")
+            IconButton(onClick = { viewModel.getOrders() }) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            }
         }
         is ApiState.Idle -> {
-            Text("Idle")
+            IconButton(onClick = { viewModel.getOrders() }) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            }
         }
 
     }

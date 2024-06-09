@@ -2,6 +2,7 @@ package com.aso.asomenuadmin.di
 
 import android.content.Context
 import com.aso.asomenuadmin.network.ApiService
+import com.aso.asomenuadmin.network.util.NetworkUtil
 import com.aso.asomenuadmin.repository.ImageRepository
 import com.aso.asomenuadmin.repository.Repository
 import com.aso.asomenuadmin.repository.RepositoryImpl
@@ -22,17 +23,21 @@ class RepositoryModule {
     fun provideImageRepository(@ApplicationContext context: Context): ImageRepository {
         return ImageRepository(context)
     }
-
-
-    @Singleton
     @Provides
-    fun provideRepository(api: ApiService): Repository {
-        return RepositoryImpl(api)
+    @Singleton
+    fun provideNetworkUtil(@ApplicationContext context: Context): NetworkUtil {
+        return NetworkUtil(context)
     }
 
     @Singleton
     @Provides
-    fun provideAuthApiService(retrofitBuilder: Retrofit.Builder): ApiService {
+    fun provideRepository(api: ApiService ,networkUtil: NetworkUtil): Repository {
+        return RepositoryImpl(api,networkUtil)
+    }
+
+    @Singleton
+    @Provides
+    fun provideApiService(retrofitBuilder: Retrofit.Builder): ApiService {
         // Provide your API service interface implementation
         return retrofitBuilder.build().create(ApiService::class.java)
     }

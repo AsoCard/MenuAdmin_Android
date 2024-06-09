@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,10 +60,11 @@ fun DrawerScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Image(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.menu),
+                    painter = painterResource(id = R.drawable.logo),
                     contentDescription = "logo",
                     modifier = Modifier
-                        .size(90.dp)
+                        .width(220.dp)
+                        .height(110.dp)
                         .align(Alignment.CenterVertically)
                 )
 

@@ -8,35 +8,23 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withTimeoutOrNull
 import retrofit2.Response
 import timber.log.Timber
-
 fun <T> apiRequestFlow(call: suspend () -> Response<T>): Flow<ApiState<T>> = flow {
-
     emit(ApiState.Loading)
-    withTimeoutOrNull(2000) {
-
-        val response = call()
-        try {
+    try {
+        withTimeoutOrNull(2000) {
+            val response = call()
             if (response.isSuccessful) {
                 response.body()?.let {
                     emit(ApiState.Success(it))
-                }
+                } ?: emit(ApiState.Failure("Response body is null", 204))
             } else {
                 response.errorBody()?.let { error ->
-                    Timber.e(error.string())
-                    error.close()
-                    val parsedError: ErrorResponse =
-                        Gson().fromJson(error.charStream(), ErrorResponse::class.java)
-                    Timber.e(parsedError.message)
+                    val parsedError: ErrorResponse = Gson().fromJson(error.charStream(), ErrorResponse::class.java)
                     emit(ApiState.Failure(parsedError.message, parsedError.code))
-                }
+                } ?: emit(ApiState.Failure("Unknown error", response.code()))
             }
-        } catch (e: Exception) {
-            Timber.e(e.message)
-            emit(ApiState.Failure(e.message ?: e.toString(), 400))
-
-        }
-
-    } ?: emit(ApiState.Failure("Timeout! Please try again.", 408))
-
-
+        } ?: emit(ApiState.Failure("Timeout! Please try again.", 408))
+    } catch (e: Exception) {
+        emit(ApiState.Failure(e.message ?: "An unknown error occurred", 500))
+    }
 }

@@ -10,15 +10,18 @@ import com.aso.asomenuadmin.network.token.TokenManager
 import com.aso.asomenuadmin.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class OrdersViewModel @Inject constructor(
-    private val repository: Repository, private val tokenManager: TokenManager
+    private val repository: Repository,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _ordersState = MutableStateFlow<ApiState<OrderResponse>>(ApiState.Idle)
@@ -29,28 +32,35 @@ class OrdersViewModel @Inject constructor(
 
     private var loginResponse: LoginResponse? = null
 
-//    private val _productRecipeState = MutableStateFlow<ApiState<Recipe>>(ApiState.Idle)
-//    val productRecipeState: StateFlow<ApiState<Recipe>> = _productRecipeState
-
     init {
-        login("norouzi8446@gmail.com", "1")
-        // get Orders Every 10 seconds
+        tryLoginIfTokenNotExist()
+    }
+
+    private fun tryLoginIfTokenNotExist() {
         viewModelScope.launch {
             while (true) {
-                getOrders()
-                delay(30000)
+                val tokenExists = tokenManager.tokenExists()
+                if (!tokenExists || _loginState.value !is ApiState.Success) {
+                    login("norouzi8446@gmail.com", "1")
+                }
+                delay(1000)
             }
         }
     }
 
-    private fun getOrders() {
-        _ordersState.value = ApiState.Loading
+     fun getOrders() {
         viewModelScope.launch {
             repository.getOrders(orderStatus = 4).collect { apiState ->
                 when (apiState) {
                     is ApiState.Success -> {
-                        _ordersState.value = apiState
-                        Timber.d("Orders successful: ${apiState.data}")
+                        val newData = apiState.data
+                        val previousData = (_ordersState.value as? ApiState.Success)?.data
+                        if (newData != previousData) {
+                            _ordersState.value = apiState
+                            Timber.d("Orders successful: $newData")
+                        } else {
+                            Timber.d("Orders data unchanged")
+                        }
                     }
 
                     is ApiState.Failure -> {
@@ -59,42 +69,17 @@ class OrdersViewModel @Inject constructor(
                     }
 
                     ApiState.Idle -> {
-                        _ordersState.value = apiState
                         Timber.d("Orders idle")
                     }
+
                     ApiState.Loading -> {
-                        _ordersState.value = apiState
                         Timber.d("Orders loading")
                     }
                 }
             }
         }
     }
-//     fun getRecipes(productId: Int) {
-//        _ordersState.value = ApiState.Loading
-//        viewModelScope.launch {
-//            repository.getRecipe(productId).collect { apiState ->
-//                when (apiState) {
-//                    is ApiState.Success -> {
-//                        _productRecipeState.value = apiState
-//                        Timber.d("Recipes successful: ${apiState.data}")
-//                    }
-//                    is ApiState.Failure -> {
-//                        _productRecipeState.value = apiState
-//                        Timber.d("Recipes failed: ${apiState.errorMessage}+${apiState.errorCode}")
-//                    }
-//                    ApiState.Idle -> {
-//                        _productRecipeState.value = ApiState.Idle
-//                        Timber.d("Recipes idle")
-//                    }
-//                    ApiState.Loading -> {
-//                        _productRecipeState.value = ApiState.Loading
-//                        Timber.d("Recipes loading")
-//                    }
-//                }
-//            }
-//        }
-//    }
+
 
     private fun login(email: String, password: String) {
         _loginState.value = ApiState.Loading
@@ -106,6 +91,8 @@ class OrdersViewModel @Inject constructor(
                         loginResponse = apiState.data
                         Timber.d("Login successful: $loginResponse")
                         storeToken(loginResponse)
+                        // After successful login, start fetching orders
+                        fetchOrdersPeriodically()
                     }
 
                     is ApiState.Failure -> {
@@ -122,16 +109,20 @@ class OrdersViewModel @Inject constructor(
     }
 
     private suspend fun storeToken(loginResponse: LoginResponse?) {
-        // Perform operations with the loginResponse data within the ViewModel
-        // For example, store tokens, update user information, etc.
-        if (loginResponse != null) {
-            tokenManager.saveToken(loginResponse.result.access)
-            tokenManager.saveRefreshToken(loginResponse.result.refresh)
-            Timber.d("Access token: ${loginResponse.result.access}")
-            Timber.d("Refresh token: ${loginResponse.result.refresh}")
-            // Additional operations with loginResponse data
+        loginResponse?.let {
+            tokenManager.saveToken(it.result.access)
+            tokenManager.saveRefreshToken(it.result.refresh)
+            Timber.d("Access token: ${it.result.access}")
+            Timber.d("Refresh token: ${it.result.refresh}")
+        }
+    }
+
+    private fun fetchOrdersPeriodically() {
+        viewModelScope.launch {
+            while (true) {
+                getOrders()
+                delay(10000) // Fetch orders every 10 seconds
+            }
         }
     }
 }
-
-

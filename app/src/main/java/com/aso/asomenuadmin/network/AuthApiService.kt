@@ -20,7 +20,7 @@ interface AuthApiService {
     @POST("api/auth/verify/")
     suspend fun verifyToken(@Body token: TokenVerify): Response<LoginResponse>
 
-    @POST("api/auth/refresh/")
+    @POST("api/auth/jwt/refresh/")
     suspend fun refreshToken(@Header("Authorization") token: String): Response<LoginResponse>
 
 }
