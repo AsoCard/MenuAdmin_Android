@@ -66,7 +66,7 @@ fun OrderCard(
                 }
                 Button(modifier = Modifier.align(Alignment.End),onClick = {
                     viewModel.updateOrderStatus(order.id, 4)
-                    viewModel.getOrders()
+
                 }) {
                     Text(text = "آماده شد!")
                 }

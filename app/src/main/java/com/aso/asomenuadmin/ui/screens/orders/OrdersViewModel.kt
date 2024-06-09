@@ -51,6 +51,7 @@ class OrdersViewModel @Inject constructor(
                 when (apiState) {
                     is ApiState.Success -> {
                         Timber.d("Order status updated successfully")
+                        getOrders()
                     }
 
                     is ApiState.Failure -> {
