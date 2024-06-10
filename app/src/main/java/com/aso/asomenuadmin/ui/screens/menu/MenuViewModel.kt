@@ -57,8 +57,8 @@ class MenuViewModel @Inject constructor(val repository: Repository) : ViewModel(
                             Timber.d("Products: $products")
                         }
                         is ApiState.Failure -> {
-                            _state.value = _state.value.copy(error = products.errorMessage, isLoading = false)
-                            Timber.e(products.errorMessage)
+                            _state.value = _state.value.copy(error = products.message, isLoading = false)
+                            Timber.e(products.message)
                         }
                         is ApiState.Loading -> {
                             _state.value = _state.value.copy(isLoading = true)

@@ -28,10 +28,10 @@ android {
     buildTypes {
         debug {
 
-            buildConfigField("String", "BASE_URL", "\"https://api.420coffee.ir/\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.420coffee.ir/api/\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://api.420coffee.ir/\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.420coffee.ir/api/\"")
 
             isMinifyEnabled = false
             proguardFiles(

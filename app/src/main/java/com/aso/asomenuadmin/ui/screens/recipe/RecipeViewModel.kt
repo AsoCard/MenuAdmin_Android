@@ -67,7 +67,7 @@ class RecipeViewModel @Inject constructor(
                             Timber.d("Recipe: $result")
                         }
                         is ApiState.Failure -> {
-                            Timber.i(apiState.errorMessage)
+                            Timber.i(apiState.message)
                             _state.value = RecipeState(
                                 title = "Error",
                                 ingredients = emptyList(),

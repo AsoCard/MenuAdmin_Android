@@ -1,44 +1,30 @@
 package com.aso.asomenuadmin.ui.screens.addMenuItem
 
+import android.Manifest
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.aso.asomenuadmin.network.entities.ApiState
+import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 
 @Composable
 fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel()) {
@@ -53,11 +39,16 @@ fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel()) {
     val mainImage by viewModel.mainImage.collectAsState()
     val ideaImage by viewModel.ideaImage.collectAsState()
     val videoUri by viewModel.videoUri.collectAsState()
+    val uploadState by viewModel.uploadState.collectAsState()
+
+
+
 
     val galleryLauncherMain =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
                 viewModel.setMainImage(it)
+                viewModel.uploadImage(it)
             }
         }
 
@@ -122,11 +113,13 @@ fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel()) {
 
         AddImageSection(label = "افزودن تصویر اصلی",
             imageBitmap = mainImage,
-            onImageClick = { galleryLauncherMain.launch("image/*") })
+            onImageClick = { galleryLauncherMain.launch("image/*") },
+            uploadState = uploadState)
 
         AddImageSection(label = "افزودن تصویر برای ایده",
             imageBitmap = ideaImage,
-            onImageClick = { galleryLauncherIdea.launch("image/*") })
+            onImageClick = { galleryLauncherIdea.launch("image/*") },
+            uploadState = uploadState)
 
         AddVideoSection(label = "افزودن ویدئو",
             videoUri = videoUri,
@@ -220,7 +213,7 @@ fun AddCategoryDropdown(selectedCategory: String, onCategorySelected: (String) -
 }
 
 @Composable
-fun AddImageSection(label: String, imageBitmap: Bitmap?, onImageClick: () -> Unit) {
+fun AddImageSection(label: String, imageBitmap: Bitmap?, onImageClick: () -> Unit, uploadState: ApiState<ImageUploadResponse>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -238,16 +231,36 @@ fun AddImageSection(label: String, imageBitmap: Bitmap?, onImageClick: () -> Uni
                 .clickable { onImageClick() },
             contentAlignment = Alignment.Center
         ) {
-            imageBitmap?.let {
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } ?: Text(text = "تصویر را به صفحه بکشید یا آپلود تصویر", color = Color(0xFFD1D1D6))
+            when (uploadState) {
+                is ApiState.Loading -> {
+                    CircularProgressIndicator()
+                }
+                is ApiState.Success -> {
+                    imageBitmap?.let {
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } ?: Text(text = "آپلود تصویر", color = Color(0xFFD1D1D6))
+                }
+                is ApiState.Failure -> {
+                    Text(text = "Error: ${uploadState.message}", color = Color.Red)
+                }
+                else -> {
+                    imageBitmap?.let {
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } ?: Text(text = "آپلود تصویر", color = Color(0xFFD1D1D6))
+                }
+            }
         }
     }
 }
+
 
 @Composable
 fun AddVideoSection(label: String, videoUri: Uri?, onVideoClick: () -> Unit) {

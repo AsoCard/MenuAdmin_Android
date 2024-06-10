@@ -82,7 +82,7 @@ fun MyApp() {
         }, content = {
             NavHost(
                 navController = myNavController.navController,
-                startDestination = MainDestinations.ORDER_ROUTE
+                startDestination = MainDestinations.ADD_MENU_ITEM_ROUTE
             ) {
                 myNavGraph(upPress = myNavController::upPress,
                     onNavigateToBottomBarRoute = { route ->

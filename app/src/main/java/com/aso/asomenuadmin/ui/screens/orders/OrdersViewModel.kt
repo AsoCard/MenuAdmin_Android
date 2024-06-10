@@ -55,7 +55,7 @@ class OrdersViewModel @Inject constructor(
                     }
 
                     is ApiState.Failure -> {
-                        Timber.d("Order status update failed: ${apiState.errorMessage}")
+                        Timber.d("Order status update failed: ${apiState.message}")
                     }
 
                     ApiState.Idle -> Timber.d("Order status update Idle")
@@ -82,7 +82,7 @@ class OrdersViewModel @Inject constructor(
 
                     is ApiState.Failure -> {
                         _ordersState.value = apiState
-                        Timber.d("Orders failed: ${apiState.errorMessage}+${apiState.errorCode}")
+                        Timber.d("Orders failed: ${apiState.message}+${apiState.errorCode}")
                     }
 
                     ApiState.Idle -> {
@@ -114,7 +114,7 @@ class OrdersViewModel @Inject constructor(
 
                     is ApiState.Failure -> {
                         _loginState.value = apiState
-                        Timber.e("Login failed: ${apiState.errorMessage}")
+                        Timber.e("Login failed: ${apiState.message}")
                     }
 
                     else -> {

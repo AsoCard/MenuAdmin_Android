@@ -20,8 +20,8 @@ class RepositoryModule {
     //image repository
     @Singleton
     @Provides
-    fun provideImageRepository(@ApplicationContext context: Context): ImageRepository {
-        return ImageRepository(context)
+    fun provideImageRepository(@ApplicationContext context: Context,api: ApiService ,networkUtil: NetworkUtil): ImageRepository {
+        return ImageRepository(context , networkUtil,api)
     }
     @Provides
     @Singleton

@@ -11,16 +11,16 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthApiService {
-    @POST("api/auth/jwt/login/")
+    @POST("auth/jwt/login/")
     suspend fun loginUser(@Body authLogin: LoginRequest): Response<LoginResponse>
 
-    @POST("api/users/register/")
+    @POST("users/register/")
     suspend fun signUpUser(@Body authSignUp: SignUpRequest): Response<SignUpResponse>
 
-    @POST("api/auth/verify/")
+    @POST("auth/verify/")
     suspend fun verifyToken(@Body token: TokenVerify): Response<LoginResponse>
 
-    @POST("api/auth/jwt/refresh/")
+    @POST("auth/jwt/refresh/")
     suspend fun refreshToken(@Header("Authorization") token: String): Response<LoginResponse>
 
 }

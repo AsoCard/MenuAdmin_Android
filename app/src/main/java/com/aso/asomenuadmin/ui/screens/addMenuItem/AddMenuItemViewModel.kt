@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aso.asomenuadmin.network.entities.ApiState
+import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 import com.aso.asomenuadmin.repository.ImageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +50,12 @@ class AddMenuItemViewModel @Inject constructor(
 
     private val _category = MutableStateFlow("")
     val category: StateFlow<String> get() = _category
+
+
+
+    private val _uploadState = MutableStateFlow<ApiState<ImageUploadResponse>>(ApiState.Idle)
+    val uploadState: StateFlow<ApiState<ImageUploadResponse>> get() = _uploadState
+
 
     fun onTitleChange(newTitle: String) {
         _title.value = newTitle
@@ -95,5 +103,13 @@ class AddMenuItemViewModel @Inject constructor(
 
     fun setVideoUri(uri: Uri) {
         _videoUri.value = uri
+    }
+
+    fun uploadImage(uri: Uri) {
+        viewModelScope.launch {
+            repository.uploadImage(uri).collect { state ->
+                _uploadState.value = state
+            }
+        }
     }
 }
