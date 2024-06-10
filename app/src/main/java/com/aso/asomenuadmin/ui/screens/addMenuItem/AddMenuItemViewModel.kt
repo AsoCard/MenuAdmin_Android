@@ -4,12 +4,14 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aso.asomenuadmin.network.AddRecipeRequest
 import com.aso.asomenuadmin.network.entities.AddProductRequest
+import com.aso.asomenuadmin.network.entities.AddProductResponse
+import com.aso.asomenuadmin.network.entities.AddRecipeResponse
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 import com.aso.asomenuadmin.repository.ImageRepository
 import com.aso.asomenuadmin.repository.Repository
-import com.google.gson.annotations.SerializedName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,155 +21,169 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
+data class AddMenuItemState(
+    val title: String = "",
+    val subtitle: String = "",
+    val description: String = "",
+    val ingredients: String = "",
+    val preparationMethod: String = "",
+    val servingMethod: String = "",
+    val price: String = "",
+    val category: String = "",
+    val mainImage: Bitmap? = null,
+    val ideaImage: Bitmap? = null,
+    val videoUri: Uri? = null,
+    val mainImageUploadState: ApiState<ImageUploadResponse> = ApiState.Idle,
+    val ideaImageUploadState: ApiState<ImageUploadResponse> = ApiState.Idle,
+    val addProductState: ApiState<AddProductResponse> = ApiState.Idle,
+    val addRecipeState: ApiState<AddRecipeResponse> = ApiState.Idle,
+    val imageIdsToUpload: MutableList<Int> = mutableListOf()
+)
+
+sealed class AddMenuItemEvent {
+    data class TitleChanged(val title: String) : AddMenuItemEvent()
+    data class SubtitleChanged(val subtitle: String) : AddMenuItemEvent()
+    data class DescriptionChanged(val description: String) : AddMenuItemEvent()
+    data class IngredientsChanged(val ingredients: String) : AddMenuItemEvent()
+    data class PreparationMethodChanged(val preparationMethod: String) : AddMenuItemEvent()
+    data class ServingMethodChanged(val servingMethod: String) : AddMenuItemEvent()
+    data class PriceChanged(val price: String) : AddMenuItemEvent()
+    data class CategoryChanged(val category: String) : AddMenuItemEvent()
+    data class MainImageChanged(val uri: Uri) : AddMenuItemEvent()
+    data class IdeaImageChanged(val uri: Uri) : AddMenuItemEvent()
+    data class VideoUriChanged(val uri: Uri) : AddMenuItemEvent()
+    object Submit : AddMenuItemEvent()
+    object AddRecipeClicked : AddMenuItemEvent()
+}
+
 @HiltViewModel
 class AddMenuItemViewModel @Inject constructor(
     private val imageRepository: ImageRepository,
     private val repository: Repository
 ) : ViewModel() {
-    private val _addProductState = MutableStateFlow<ApiState<String>>(ApiState.Idle)
-    val addProductState: StateFlow<ApiState<String>> get() = _addProductState
-    private val currentDateTime: LocalDateTime
-        get() = LocalDateTime.now()
 
-    private val _title = MutableStateFlow("")
-    val title: StateFlow<String> get() = _title
+    private val _state = MutableStateFlow(AddMenuItemState())
+    val state: StateFlow<AddMenuItemState> get() = _state
 
-    private val _subtitle = MutableStateFlow("")
-    val subtitle: StateFlow<String> get() = _subtitle
+    fun handleEvent(event: AddMenuItemEvent) {
+        when (event) {
+            is AddMenuItemEvent.TitleChanged -> _state.value =
+                _state.value.copy(title = event.title)
 
-    private val _description = MutableStateFlow("")
-    val description: StateFlow<String> get() = _description
+            is AddMenuItemEvent.SubtitleChanged -> _state.value =
+                _state.value.copy(subtitle = event.subtitle)
 
-    private val _ingredients = MutableStateFlow("")
-    val ingredients: StateFlow<String> get() = _ingredients
+            is AddMenuItemEvent.DescriptionChanged -> _state.value =
+                _state.value.copy(description = event.description)
 
-    private val _preparationMethod = MutableStateFlow("")
-    val preparationMethod: StateFlow<String> get() = _preparationMethod
+            is AddMenuItemEvent.IngredientsChanged -> _state.value =
+                _state.value.copy(ingredients = event.ingredients)
 
-    private val _servingMethod = MutableStateFlow("")
-    val servingMethod: StateFlow<String> get() = _servingMethod
+            is AddMenuItemEvent.PreparationMethodChanged -> _state.value =
+                _state.value.copy(preparationMethod = event.preparationMethod)
 
-    private val _mainImage = MutableStateFlow<Bitmap?>(null)
-    val mainImage: StateFlow<Bitmap?> get() = _mainImage
+            is AddMenuItemEvent.ServingMethodChanged -> _state.value =
+                _state.value.copy(servingMethod = event.servingMethod)
 
-    private val _imageListToUpload = MutableStateFlow(emptyList<Int>())
-    val imageListToUpload: StateFlow<List<Int>> get() = _imageListToUpload
+            is AddMenuItemEvent.PriceChanged -> _state.value =
+                _state.value.copy(price = event.price)
 
-    private val _ideaImage = MutableStateFlow<Bitmap?>(null)
-    val ideaImage: StateFlow<Bitmap?> get() = _ideaImage
+            is AddMenuItemEvent.CategoryChanged -> _state.value =
+                _state.value.copy(category = event.category)
 
-    private val _videoUri = MutableStateFlow<Uri?>(null)
-    val videoUri: StateFlow<Uri?> get() = _videoUri
+            is AddMenuItemEvent.MainImageChanged -> uploadMainImage(event.uri)
+            is AddMenuItemEvent.IdeaImageChanged -> uploadIdeaImage(event.uri)
+            is AddMenuItemEvent.VideoUriChanged -> _state.value =
+                _state.value.copy(videoUri = event.uri)
 
-    private val _price = MutableStateFlow("")
-    val price: StateFlow<String> get() = _price
-
-    private val _category = MutableStateFlow("")
-    val category: StateFlow<String> get() = _category
-
-    private val _uploadState = MutableStateFlow<ApiState<ImageUploadResponse>>(ApiState.Idle)
-    val uploadState: StateFlow<ApiState<ImageUploadResponse>> get() = _uploadState
-
-    fun onTitleChange(newTitle: String) {
-        _title.value = newTitle
-    }
-
-    fun onSubtitleChange(newSubtitle: String) {
-        _subtitle.value = newSubtitle
-    }
-
-    fun onDescriptionChange(newDescription: String) {
-        _description.value = newDescription
-    }
-
-    fun onIngredientsChange(newIngredients: String) {
-        _ingredients.value = newIngredients
-    }
-
-    fun onPreparationMethodChange(newPreparationMethod: String) {
-        _preparationMethod.value = newPreparationMethod
-    }
-
-    fun onServingMethodChange(newServingMethod: String) {
-        _servingMethod.value = newServingMethod
-    }
-
-    fun onPriceChange(newPrice: String) {
-        _price.value = newPrice
-    }
-
-    fun onCategoryChange(newCategory: String) {
-        _category.value = newCategory
-    }
-
-    fun setMainImage(uri: Uri) {
-        viewModelScope.launch {
-            _mainImage.value = imageRepository.compressImage(uri)
+            is AddMenuItemEvent.Submit -> onSubmit()
+            is AddMenuItemEvent.AddRecipeClicked -> onAddRecipeClicked()
         }
     }
 
-    fun setIdeaImage(uri: Uri) {
+    private fun uploadMainImage(uri: Uri) {
         viewModelScope.launch {
-            _ideaImage.value = imageRepository.compressImage(uri)
-        }
-    }
-
-    fun setVideoUri(uri: Uri) {
-        _videoUri.value = uri
-    }
-
-    fun uploadImage(uri: Uri) {
-        viewModelScope.launch {
-            imageRepository.uploadImage(uri).collect { state ->
-                _uploadState.value = state
-
-                when (state) {
-                    is ApiState.Success -> {
-                        val uploadedImageId = state.data.result.id
-                        _imageListToUpload.value += uploadedImageId
+            imageRepository.compressImage(uri)?.let {
+                _state.value = _state.value.copy(mainImage = it)
+                imageRepository.uploadImage(uri).collect { state ->
+                    _state.value = _state.value.copy(mainImageUploadState = state)
+                    when(state) {
+                        is ApiState.Failure -> Timber.e("Failure: ${state.message}")
+                        is ApiState.Idle -> Timber.d("Idle...")
+                        is ApiState.Loading -> Timber.d("Loading...")
+                        is ApiState.Success -> {
+                            val imageId = state.data.result.id
+                            val updatedIdsList = _state.value.imageIdsToUpload.toMutableList()
+                            updatedIdsList.add(imageId)
+                            _state.value = _state.value.copy(imageIdsToUpload = updatedIdsList)
+                        }
                     }
-                    is ApiState.Failure -> Timber.e(state.message)
-                    ApiState.Idle -> Timber.d("Idle")
-                    ApiState.Loading -> Timber.d("Loading")
                 }
             }
         }
     }
 
+    private fun uploadIdeaImage(uri: Uri) {
+        viewModelScope.launch {
+            imageRepository.compressImage(uri)?.let {
+                _state.value = _state.value.copy(ideaImage = it)
+                imageRepository.uploadImage(uri).collect { state ->
+                    _state.value = _state.value.copy(ideaImageUploadState = state)
 
-    fun onSubmitClicked() {
+                    when(state) {
+                        is ApiState.Failure -> Timber.e("Failure: ${state.message}")
+                        is ApiState.Idle -> Timber.d("Idle...")
+                        is ApiState.Loading -> Timber.d("Loading...")
+                        is ApiState.Success -> {
+                            val imageId = state.data.result.id
+                            val updatedIdsList = _state.value.imageIdsToUpload.toMutableList()
+                            updatedIdsList.add(imageId)
+                            _state.value = _state.value.copy(imageIdsToUpload = updatedIdsList)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onSubmit() {
+        onAddRecipeClicked()
         viewModelScope.launch {
             repository.addProduct(
                 AddProductRequest(
                     category = 1,
-                    images = _imageListToUpload.value,
-                    name = title.value,
-                    detail = description.value,
-                    price = price.value.toDouble(),
-                    ingredients = ingredients.value
+                    images = state.value.imageIdsToUpload,
+                    name = state.value.title,
+                    detail = state.value.description,
+                    price = state.value.price.toDoubleOrNull() ?: 0.0,
+                    ingredients = state.value.ingredients
                 )
-            ).collect { state ->
-                when (state) {
-                    is ApiState.Success -> {
-                        _addProductState.value = ApiState.Success(state.data.message)
-                        Timber.d("Product added successfully: ${state.data}")
-                    }
-                    is ApiState.Failure -> {
-                        _addProductState.value = ApiState.Failure(state.message, state.errorCode)
-                        Timber.e("Failed to add product: ${state.message}")
-                    }
-                    ApiState.Loading -> {
-                        _addProductState.value = ApiState.Loading
-                        Timber.d("Adding product...")
-                    }
-                    ApiState.Idle -> Timber.d("Idle state")
-                }
+            ).collect { apiState ->
+                _state.value = _state.value.copy(addProductState = apiState)
+            }
+        }
+    }
+
+    private fun onAddRecipeClicked() {
+        viewModelScope.launch {
+            repository.addRecipe(
+                AddRecipeRequest(
+                    created_at = getCurrentDateTimeAsString(),
+                    title = state.value.title,
+                    ingredients = state.value.ingredients,
+                    steps = state.value.preparationMethod,
+                    img = state.value.mainImage?.toString(),
+                    video = state.value.videoUri?.toString(),
+                    product = 0L // Replace with actual product ID
+                )
+            ).collect { apiState ->
+                _state.value = _state.value.copy(addRecipeState = apiState)
             }
         }
     }
 
     private fun getCurrentDateTimeAsString(): String {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        return currentDateTime.format(formatter)
+        return LocalDateTime.now().format(formatter)
     }
 }

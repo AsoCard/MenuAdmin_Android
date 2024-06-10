@@ -1,13 +1,14 @@
 package com.aso.asomenuadmin.repository
 
 import com.aso.asomenuadmin.model.OrderResponse
-import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.model.ProductResponse
 import com.aso.asomenuadmin.model.Recipe
+import com.aso.asomenuadmin.network.AddRecipeRequest
 import com.aso.asomenuadmin.network.ApiService
 import com.aso.asomenuadmin.network.apiRequestFlow
 import com.aso.asomenuadmin.network.entities.AddProductRequest
 import com.aso.asomenuadmin.network.entities.AddProductResponse
+import com.aso.asomenuadmin.network.entities.AddRecipeResponse
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.LoginRequest
 import com.aso.asomenuadmin.network.entities.LoginResponse
@@ -20,6 +21,8 @@ interface Repository {
     //    suspend fun fetchData(): List<Product>
     fun login(email: String, password: String): Flow<ApiState<LoginResponse>>
     fun getRecipe(productId: Long): Flow<ApiState<Recipe>>
+    suspend fun addRecipe(addRecipeRequest: AddRecipeRequest): Flow<ApiState<AddRecipeResponse>>
+
     suspend fun getOrders(orderStatus: Int): Flow<ApiState<OrderResponse>>
     suspend fun updateOrderStatus(orderId: Int, orderStatus: Int): Flow<ApiState<Any>>
 
@@ -79,5 +82,11 @@ class RepositoryImpl @Inject constructor(
             flow { emit(ApiState.Failure("No internet connection", -1)) }
         }
     }
-
+    override suspend fun addRecipe(addRecipeRequest: AddRecipeRequest): Flow<ApiState<AddRecipeResponse>> {
+        return if (networkUtil.isNetworkConnected()) {
+            apiRequestFlow { apiService.addRecipe(addRecipeRequest) }
+        } else {
+            flow { emit(ApiState.Failure("No internet connection", -1)) }
+        }
+    }
 }

@@ -9,21 +9,28 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -37,52 +44,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberAsyncImagePainter
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 
 @Composable
 fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel(), onUpPress: () -> Unit) {
-    val title by viewModel.title.collectAsState()
-    val subtitle by viewModel.subtitle.collectAsState()
-    val description by viewModel.description.collectAsState()
-    val ingredients by viewModel.ingredients.collectAsState()
-    val preparationMethod by viewModel.preparationMethod.collectAsState()
-    val servingMethod by viewModel.servingMethod.collectAsState()
-    val price by viewModel.price.collectAsState()
-    val category by viewModel.category.collectAsState()
-    val mainImage by viewModel.mainImage.collectAsState()
-    val ideaImage by viewModel.ideaImage.collectAsState()
-    val videoUri by viewModel.videoUri.collectAsState()
-    val uploadState by viewModel.uploadState.collectAsState()
-    val addProductState by viewModel.addProductState.collectAsState()
-
-
+    val state by viewModel.state.collectAsState()
 
     val galleryLauncherMain =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                viewModel.setMainImage(it)
-                viewModel.uploadImage(it)
-            }
+            uri?.let { viewModel.handleEvent(AddMenuItemEvent.MainImageChanged(it)) }
         }
 
     val galleryLauncherIdea =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                viewModel.setIdeaImage(it)
-                viewModel.uploadImage(it)
-
-            }
+            uri?.let { viewModel.handleEvent(AddMenuItemEvent.IdeaImageChanged(it)) }
         }
 
     val galleryLauncherVideo =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                viewModel.setVideoUri(it)
-            }
+            uri?.let { viewModel.handleEvent(AddMenuItemEvent.VideoUriChanged(it)) }
         }
 
     Column(
@@ -101,199 +85,196 @@ fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel(), onUpPre
         Spacer(modifier = Modifier.height(24.dp))
 
         AddMenuItemInputField(
-            label = "عنوان اصلی", value = title, onValueChange = viewModel::onTitleChange
+            label = "عنوان اصلی",
+            value = state.title,
+            onValueChange = { viewModel.handleEvent(AddMenuItemEvent.TitleChanged(it)) }
         )
         AddMenuItemInputField(
-            label = "عنوان فرعی", value = subtitle, onValueChange = viewModel::onSubtitleChange
+            label = "عنوان فرعی",
+            value = state.subtitle,
+            onValueChange = { viewModel.handleEvent(AddMenuItemEvent.SubtitleChanged(it)) }
         )
         AddMenuItemInputField(
-            label = "توضیحات", value = description, onValueChange = viewModel::onDescriptionChange
+            label = "توضیحات",
+            value = state.description,
+            onValueChange = { viewModel.handleEvent(AddMenuItemEvent.DescriptionChanged(it)) }
         )
         AddMenuItemInputField(
-            label = "مواد لازم", value = ingredients, onValueChange = viewModel::onIngredientsChange
+            label = "مواد لازم",
+            value = state.ingredients,
+            onValueChange = { viewModel.handleEvent(AddMenuItemEvent.IngredientsChanged(it)) }
         )
         AddMenuItemInputField(
             label = "طرز تهیه",
-            value = preparationMethod,
-            onValueChange = viewModel::onPreparationMethodChange
+            value = state.preparationMethod,
+            onValueChange = { viewModel.handleEvent(AddMenuItemEvent.PreparationMethodChanged(it)) }
         )
         AddMenuItemInputField(
             label = "نحوه سرو کردن",
-            value = servingMethod,
-            onValueChange = viewModel::onServingMethodChange
+            value = state.servingMethod,
+            onValueChange = { viewModel.handleEvent(AddMenuItemEvent.ServingMethodChanged(it)) }
         )
         AddMenuItemInputField(
-            label = "قیمت", value = price, onValueChange = viewModel::onPriceChange
+            label = "قیمت",
+            value = state.price,
+            onValueChange = { viewModel.handleEvent(AddMenuItemEvent.PriceChanged(it)) }
         )
 
         AddCategoryDropdown(
-            selectedCategory = category, onCategorySelected = viewModel::onCategoryChange
+            selectedCategory = state.category,
+            onCategorySelected = { viewModel.handleEvent(AddMenuItemEvent.CategoryChanged(it)) }
         )
 
         AddImageSection(label = "افزودن تصویر اصلی",
-            imageBitmap = mainImage,
+            imageBitmap = state.mainImage,
             onImageClick = { galleryLauncherMain.launch("image/*") },
-            uploadState = uploadState)
+            uploadState = state.mainImageUploadState
+        )
 
         AddImageSection(label = "افزودن تصویر برای ایده",
-            imageBitmap = ideaImage,
+            imageBitmap = state.ideaImage,
             onImageClick = { galleryLauncherIdea.launch("image/*") },
-            uploadState = uploadState)
+            uploadState = state.ideaImageUploadState
+        )
 
-        AddVideoSection(label = "افزودن ویدئو",
-            videoUri = videoUri,
-            onVideoClick = { galleryLauncherVideo.launch("video/*") })
-
-        Spacer(modifier = Modifier.height(16.dp))
+//        AddVideoSection(
+//            label = "افزودن ویدئو", videoUri = state.videoUri,
+//            onVideoClick = { galleryLauncherVideo.launch("video/*") })
 
         Button(
-            onClick = { viewModel.onSubmitClicked() },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { viewModel.handleEvent(AddMenuItemEvent.Submit) },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            when (addProductState) {
-
-                is ApiState.Failure -> Text(text = "تایید")
-                ApiState.Idle -> Text(text = "تایید")
-
-                ApiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.CenterVertically), color = Color.White
-                    )
-                }
-
-                is ApiState.Success -> onUpPress.invoke()
-            }
+            Text(text = "ثبت آیتم منو")
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = {
-                onUpPress.invoke()
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+            onClick = { viewModel.handleEvent(AddMenuItemEvent.AddRecipeClicked) },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "بازگشت")
+            Text(text = "ثبت دستور غذا")
         }
-    }
-}
-
-@Composable
-fun AddMenuItemInputField(label: String, value: String, onValueChange: (String) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFD1D1D6))
-        )
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.White),
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF2C2C2E))
-                .padding(8.dp)
-        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun AddMenuItemInputField(label: String, value: String, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
+        singleLine = true,
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            cursorColor = Color.White,
+            focusedBorderColor = Color.White,
+            unfocusedBorderColor = Color.Gray
+        )
+    )
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun AddCategoryDropdown(selectedCategory: String, onCategorySelected: (String) -> Unit) {
-    val categories = listOf("Cold Drink", "Hot Drink", "Cake", "Take Away")
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(selectedCategory) }
+    val categories = listOf("Category 1", "Category 2", "Category 3")
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        TextField(
-            value = selectedText,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("دسته‌بندی", color = Color(0xFFD1D1D6)) },
+        Surface(
+            onClick = { expanded = !expanded },
+            shape = MaterialTheme.shapes.small,
+            color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { expanded = true },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color(0xFF2C2C2E),
-                focusedTextColor = Color.White,
-                cursorColor = Color.White,
-                unfocusedLabelColor = Color(0xFFD1D1D6)
-            )
-        )
+                .clickable { expanded = !expanded }
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = selectedCategory.ifEmpty { "دسته بندی" },
+                    color = if (selectedCategory.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { expanded = !expanded }
+                )
+            }
+        }
 
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             categories.forEach { category ->
                 DropdownMenuItem(
+                    text = { Text(text = category) },
                     onClick = {
-                        selectedText = category
-                        expanded = false
                         onCategorySelected(category)
+                        expanded = false
                     },
-                    text = { Text(text = category) }
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                 )
             }
         }
     }
 }
 
+
+
 @Composable
-fun AddImageSection(label: String, imageBitmap: Bitmap?, onImageClick: () -> Unit, uploadState: ApiState<ImageUploadResponse>) {
+fun AddImageSection(
+    label: String,
+    imageBitmap: Bitmap?,
+    onImageClick: () -> Unit,
+    uploadState: ApiState<ImageUploadResponse>
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFD1D1D6))
-        )
+        Text(text = label, style = MaterialTheme.typography.bodyLarge.copy(color = Color.White))
+        Spacer(modifier = Modifier.height(8.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
-                .background(Color(0xFF2C2C2E))
+                .height(200.dp)
+                .background(Color.Gray)
                 .clickable { onImageClick() },
             contentAlignment = Alignment.Center
         ) {
-            when (uploadState) {
-                is ApiState.Loading -> {
-                    CircularProgressIndicator()
-                }
-                is ApiState.Success -> {
-                    imageBitmap?.let {
-                        Image(
-                            bitmap = it.asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } ?: Text(text = "آپلود تصویر", color = Color(0xFFD1D1D6))
-                }
-                is ApiState.Failure -> {
-                    Text(text = "Error: ${uploadState.message}", color = Color.Red)
-                }
-                else -> {
-                    imageBitmap?.let {
-                        Image(
-                            bitmap = it.asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } ?: Text(text = "آپلود تصویر", color = Color(0xFFD1D1D6))
-                }
+            if (imageBitmap != null) {
+                Image(
+                    bitmap = imageBitmap.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Text(text = "Tap to add image", color = Color.White)
             }
+        }
+        when (uploadState) {
+            is ApiState.Loading -> CircularProgressIndicator()
+            is ApiState.Failure -> Text("Upload Failed", color = Color.Red)
+            is ApiState.Success -> Text("Upload Success", color = Color.Green)
+            else -> {}
         }
     }
 }
-
 
 @Composable
 fun AddVideoSection(label: String, videoUri: Uri?, onVideoClick: () -> Unit) {
@@ -302,25 +283,21 @@ fun AddVideoSection(label: String, videoUri: Uri?, onVideoClick: () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFFD1D1D6))
-        )
+        Text(text = label, style = MaterialTheme.typography.bodyLarge.copy(color = Color.White))
+        Spacer(modifier = Modifier.height(8.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
-                .background(Color(0xFF2C2C2E))
+                .height(200.dp)
+                .background(Color.Gray)
                 .clickable { onVideoClick() },
             contentAlignment = Alignment.Center
         ) {
-            videoUri?.let {
-                Image(
-                    painter = rememberAsyncImagePainter(model = it),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } ?: Text(text = "تصویر را به صفحه بکشید یا آپلود ویدئو", color = Color(0xFFD1D1D6))
+            if (videoUri != null) {
+                Text(text = "Video selected", color = Color.White)
+            } else {
+                Text(text = "Tap to add video", color = Color.White)
+            }
         }
     }
 }
