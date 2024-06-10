@@ -151,7 +151,7 @@ private fun NavGraphBuilder.myNavGraph(
         })
     }
     composable(route = MainDestinations.ADD_MENU_ITEM_ROUTE) {
-        AddMenuItemScreen()
+        AddMenuItemScreen(onUpPress = upPress)
     }
     composable(route = MainDestinations.MENU_LIST_ROUTE) {
         MenuScreen()

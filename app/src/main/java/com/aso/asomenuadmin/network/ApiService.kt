@@ -6,6 +6,8 @@ import com.aso.asomenuadmin.model.OrderResponse
 import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.model.ProductResponse
 import com.aso.asomenuadmin.model.Recipe
+import com.aso.asomenuadmin.network.entities.AddProductRequest
+import com.aso.asomenuadmin.network.entities.AddProductResponse
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 import com.aso.asomenuadmin.network.entities.LoginRequest
 import com.aso.asomenuadmin.network.entities.LoginResponse
@@ -53,7 +55,10 @@ interface ApiService {
     @GET("products/{id}/")
     fun getProductById(@Path("id") id: Int): Response<Product>
 
-    @PUT("products/{id}/")
+    @POST("products/add/")
+    suspend fun addProduct( @Body product: AddProductRequest):Response<AddProductResponse>
+
+   @PUT("products/{id}/")
     suspend fun updateProduct(@Path("id") id: Int, @Body product: Product):Response<Product>
 
     @PATCH("products/{id}/")
