@@ -25,14 +25,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aso.asomenuadmin.network.entities.ApiState
@@ -142,18 +138,22 @@ fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel(), onUpPre
 //            onVideoClick = { galleryLauncherVideo.launch("video/*") })
 
         Button(
-            onClick = { viewModel.handleEvent(AddMenuItemEvent.Submit) },
+            onClick = {
+                viewModel.handleEvent(AddMenuItemEvent.Submit)
+                viewModel.handleEvent(AddMenuItemEvent.AddRecipeClicked)
+                onUpPress.invoke()
+            },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(text = "ثبت آیتم منو")
         }
 
-        Button(
-            onClick = { viewModel.handleEvent(AddMenuItemEvent.AddRecipeClicked) },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text(text = "ثبت دستور غذا")
-        }
+//        Button(
+//            onClick = { viewModel.handleEvent(AddMenuItemEvent.AddRecipeClicked) },
+//            modifier = Modifier.align(Alignment.CenterHorizontally)
+//        ) {
+//            Text(text = "ثبت دستور غذا")
+//        }
     }
 }
 
@@ -225,8 +225,9 @@ fun AddCategoryDropdown(selectedCategory: String, onCategorySelected: (String) -
                     onClick = {
                         onCategorySelected(category)
                         expanded = false
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    }, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 )
             }
         }

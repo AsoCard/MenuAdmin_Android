@@ -24,6 +24,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.ui.theme.BlackBrown
 import com.aso.asomenuadmin.ui.theme.Brown
+import com.aso.asomenuadmin.ui.theme.LightBeige
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +48,7 @@ fun MenuScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToAddProduct) {
+            FloatingActionButton(onClick = onNavigateToAddProduct, containerColor = LightBeige) {
                 Icon(Icons.Default.Add, contentDescription = "Add Product")
             }
         }

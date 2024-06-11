@@ -84,7 +84,8 @@ class MenuViewModel @Inject constructor(
             repository.deleteProduct(productId).collect { apiState ->
                 when (apiState) {
                     is ApiState.Success -> loadProducts()
-                    is ApiState.Failure -> _state.value = _state.value.copy(error = apiState.message)
+                    is ApiState.Failure -> loadProducts() // fix this response success is 204 but we get it as error
+//                    is ApiState.Failure -> _state.value = _state.value.copy(error = apiState.message)
                     ApiState.Idle -> Timber.d("Delete product Idle")
                     ApiState.Loading -> Timber.d("Delete product Loading")
                 }
