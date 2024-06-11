@@ -1,22 +1,24 @@
 package com.aso.asomenuadmin.ui.screens.orders
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aso.asomenuadmin.model.Order
@@ -24,6 +26,7 @@ import com.aso.asomenuadmin.model.OrderResponse
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.ui.component.OrderCard
 import com.aso.asomenuadmin.ui.component.TopAppBar
+import com.aso.asomenuadmin.ui.theme.LightBeige
 import kotlinx.coroutines.launch
 
 @Composable
@@ -40,7 +43,11 @@ fun OrdersScreen(
         is ApiState.Loading -> {
             IconButton(onClick = { /*TODO*/ }) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(LightBeige.copy(alpha = 0.3f)),
                     strokeWidth = 2.dp
                 )
             }
@@ -48,18 +55,42 @@ fun OrdersScreen(
 
         is ApiState.Success -> {
             ordersList = (ordersState.value as ApiState.Success<OrderResponse>).data.result
-            IconButton(onClick = { viewModel.getOrders() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            IconButton(modifier = Modifier
+                .padding(16.dp)
+                .clip(CircleShape)
+                .background(LightBeige.copy(alpha = 0.3f))
+                .size(32.dp),
+                onClick = { viewModel.getOrders() }) {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Refresh"
+                )
             }
         }
         is ApiState.Failure -> {
-            IconButton(onClick = { viewModel.getOrders() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            IconButton(modifier = Modifier
+                .padding(16.dp)
+                .clip(CircleShape)
+                .background(LightBeige.copy(alpha = 0.3f))
+                .size(32.dp),
+                onClick = { viewModel.getOrders() }) {
+                Icon(
+
+                    imageVector = Icons.Default.Refresh, contentDescription = "Refresh"
+                )
             }
         }
         is ApiState.Idle -> {
-            IconButton(onClick = { viewModel.getOrders() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            IconButton(modifier = Modifier
+                .padding(16.dp)
+                .clip(CircleShape)
+                .background(LightBeige.copy(alpha = 0.3f))
+                .size(32.dp),
+                onClick = { viewModel.getOrders() }) {
+                Icon(
+                    imageVector = Icons.Default.Refresh, contentDescription = "Refresh"
+                )
             }
         }
 

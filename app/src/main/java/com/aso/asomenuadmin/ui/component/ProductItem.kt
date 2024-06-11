@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,11 +22,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.aso.asomenuadmin.R
 import com.aso.asomenuadmin.model.Product
+import com.aso.asomenuadmin.ui.theme.LightBeige
 
 @Composable
 fun ProductItem(
@@ -63,17 +68,28 @@ fun ProductItem(
                 .weight(1f)
                 .padding(start = 8.dp)
         ) {
-            Text(text = product.name)
-            Text(text = product.detail)
+            Text(
+                text = product.name,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(text = product.detail ,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))
-
         TextButton(
             onClick = { onRecipeClick(product.id.toString()) },
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier.align(Alignment.CenterVertically),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = LightBeige
+            )
         ) {
-            Text(text = "Recipe")
+            Text(
+                text = "دیدن طرز تهیه",
+                color = LightBeige.copy(.7f),
+                style = TextStyle(fontWeight = FontWeight.Bold)
+            )
         }
     }
 }

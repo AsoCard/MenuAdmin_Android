@@ -12,6 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = Brown, secondary = LightBeige, tertiary = Brown
+    , onPrimary = Color.White, onSecondary = Brown, onTertiary = Color.White
+
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -33,7 +35,7 @@ fun MenuAdminTheme(
     //dark theme is set to true
     darkTheme: Boolean = true,
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {

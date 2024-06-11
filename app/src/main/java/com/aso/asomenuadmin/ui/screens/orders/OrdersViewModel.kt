@@ -138,7 +138,7 @@ class OrdersViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 getOrders()
-                delay(10000) // Fetch orders every 10 seconds
+                delay(5000) // Fetch orders every 10 seconds
             }
         }
     }
