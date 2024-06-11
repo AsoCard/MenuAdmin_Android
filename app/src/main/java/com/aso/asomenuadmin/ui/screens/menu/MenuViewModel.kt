@@ -7,98 +7,120 @@ import com.aso.asomenuadmin.model.Category
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-data class MenuState(
+@HiltViewModel
+class MenuViewModel @Inject constructor(
+    private val repository: Repository
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(MenuUiState())
+    val state: StateFlow<MenuUiState> = _state
+
+    private val _intent = MutableSharedFlow<MenuIntent>()
+    private val intent: SharedFlow<MenuIntent> = _intent
+
+    init {
+        handleIntents()
+        sendIntent(MenuIntent.LoadProducts)
+    }
+
+    private fun handleIntents() {
+        viewModelScope.launch {
+            intent.collect { menuIntent ->
+                when (menuIntent) {
+                    is MenuIntent.LoadProducts -> loadProducts()
+                    is MenuIntent.DeleteProduct -> deleteProduct(menuIntent.productId)
+                    is MenuIntent.EditProduct -> editProduct(menuIntent.product)
+                }
+            }
+        }
+    }
+
+    private fun loadProducts() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            repository.getProducts().collect { apiState ->
+                when (apiState) {
+                    is ApiState.Success -> {
+                        _state.value = _state.value.copy(
+                            products = apiState.data.result,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                    is ApiState.Failure -> {
+                        _state.value = _state.value.copy(
+                            isLoading = false,
+                            error = apiState.message
+                        )
+                    }
+
+                    ApiState.Idle -> {
+                        Timber.d("Products Idle")
+                        _state.value = _state.value.copy(
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                    ApiState.Loading -> {
+                        Timber.d("Products Loading")
+                        _state.value = _state.value.copy(isLoading = true)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun deleteProduct(productId: Int) {
+        viewModelScope.launch {
+            repository.deleteProduct(productId).collect { apiState ->
+                when (apiState) {
+                    is ApiState.Success -> loadProducts()
+                    is ApiState.Failure -> _state.value = _state.value.copy(error = apiState.message)
+                    ApiState.Idle -> Timber.d("Delete product Idle")
+                    ApiState.Loading -> Timber.d("Delete product Loading")
+                }
+            }
+        }
+    }
+
+    private fun editProduct(product: Product) {
+        viewModelScope.launch {
+            repository.updateProduct(product.id, product).collect { apiState ->
+                when (apiState) {
+                    is ApiState.Success -> loadProducts()
+                    is ApiState.Failure -> _state.value = _state.value.copy(error = apiState.message)
+                    ApiState.Idle -> Timber.d("Edit product Idle")
+                    ApiState.Loading -> Timber.d("Edit product Loading")
+                }
+            }
+        }
+    }
+
+    fun sendIntent(menuIntent: MenuIntent) {
+        viewModelScope.launch {
+            _intent.emit(menuIntent)
+        }
+    }
+}
+
+sealed class MenuIntent {
+    object LoadProducts : MenuIntent()
+    data class DeleteProduct(val productId: Int) : MenuIntent()
+    data class EditProduct(val product: Product) : MenuIntent()
+}
+
+data class MenuUiState(
     val products: List<Product> = emptyList(),
     val categories: List<Category> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
-
-sealed class MenuIntent {
-    data class LoadProducts(val search: String) : MenuIntent()
-    object LoadCategories : MenuIntent()
-}
-
-@HiltViewModel
-class MenuViewModel @Inject constructor(val repository: Repository) : ViewModel() {
-    private val _state = MutableStateFlow(MenuState())
-    val state: StateFlow<MenuState> get() = _state
-
-    init {
-        handleIntent(MenuIntent.LoadProducts(""))
-        handleIntent(MenuIntent.LoadCategories)
-    }
-
-    fun handleIntent(intent: MenuIntent) {
-        when (intent) {
-            is MenuIntent.LoadProducts -> loadProducts(intent.search)
-            is MenuIntent.LoadCategories -> loadCategories()
-        }
-    }
-
-    private fun loadProducts(search: String) {
-        viewModelScope.launch {
-            repository.getProducts(search)
-                .onStart { _state.value = _state.value.copy(isLoading = true) }
-                .catch { e -> _state.value = _state.value.copy(isLoading = false, error = e.message) }
-                .collect { products ->
-                    Timber.d("Products: $products")
-                    when (products) {
-                        is ApiState.Success -> {
-                            _state.value = _state.value.copy(products = products.data.result, isLoading = false)
-                            Timber.d("Products: $products")
-                        }
-                        is ApiState.Failure -> {
-                            _state.value = _state.value.copy(error = products.message, isLoading = false)
-                            Timber.e(products.message)
-                        }
-                        is ApiState.Loading -> {
-                            _state.value = _state.value.copy(isLoading = true)
-                            Timber.d("Loading...")
-                        }
-                        ApiState.Idle -> {
-                            _state.value = _state.value.copy(products = emptyList(), isLoading = false)
-                            Timber.d("Idle")
-                        }
-                    }
-                }
-        }
-    }
-
-    private fun loadCategories() {
-        viewModelScope.launch {
-//            repository.getCategories()
-//                .onStart { _state.value = _state.value.copy(isLoading = true) }
-//                .catch { e -> _state.value = _state.value.copy(isLoading = false, error = e.message) }
-//                .collect { categories ->
-//                    Timber.d("Categories: $categories")
-//                    when (categories) {
-//                        is ApiState.Success -> {
-//                            _state.value = _state.value.copy(categories = categories.data, isLoading = false)
-//                            Timber.d("Categories: $categories")
-//                        }
-//                        is ApiState.Failure -> {
-//                            _state.value = _state.value.copy(error = categories.errorMessage, isLoading = false)
-//                            Timber.e(categories.errorMessage)
-//                        }
-//                        is ApiState.Loading -> {
-//                            _state.value = _state.value.copy(isLoading = true)
-//                            Timber.d("Loading...")
-//                        }
-//                        ApiState.Idle -> {
-//                            _state.value = _state.value.copy(categories = emptyList(), isLoading = false)
-//                            Timber.d("Idle")
-//                        }
-//                    }
-//                }
-        }
-    }
-}

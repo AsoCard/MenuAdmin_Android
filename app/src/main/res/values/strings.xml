@@ -3,4 +3,5 @@
     <string name="orders">سفارشات</string>
     <string name="menu">منو</string>
     <string name="order_history">تاریخچه سفارشات</string>
+    <string name="recipe">طرز تهیه</string>
 </resources>

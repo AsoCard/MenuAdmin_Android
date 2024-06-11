@@ -137,7 +137,7 @@ private fun NavGraphBuilder.myNavGraph(
         arguments = listOf(navArgument("productId") { type = NavType.LongType })
     ) {
         val productId = it.arguments?.getLong("productId") ?: return@composable
-        RecipeScreen(productId)
+        RecipeScreen(productId, upPress = upPress)
     }
 
     composable(route = MainDestinations.MENU_ITEM_ROUTE) {
@@ -153,7 +153,18 @@ private fun NavGraphBuilder.myNavGraph(
     composable(route = MainDestinations.ADD_MENU_ITEM_ROUTE) {
         AddMenuItemScreen(onUpPress = upPress)
     }
-    composable(route = MainDestinations.MENU_LIST_ROUTE) {
-        MenuScreen()
+    composable(route = MainDestinations.MENU_LIST_ROUTE) {navbs->
+        MenuScreen(
+            onNavigateToAddProduct = { onNavigateToAnySubScreen(MainDestinations.ADD_MENU_ITEM_ROUTE,
+                navbs
+            )
+            },
+            onNavigateToEditProduct = {
+                onNavigateToAnySubScreen(
+                    MainDestinations.ADD_MENU_ITEM_ROUTE,
+                    navbs
+                )
+            }
+        )
     }
 }

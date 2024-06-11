@@ -64,7 +64,7 @@ interface ApiService {
     suspend fun patchProduct(@Path("id") id: Int, @Body product: Product): Response<Product>
 
     @DELETE("products/{id}/")
-    suspend fun deleteProduct(@Path("id") id: Int): Void
+    suspend fun deleteProduct(@Path("id") id: Int): Response<Unit>
 
     @GET("products/recepie/{productId}")
     suspend fun getRecipe(@Path("productId") productId: Long):Response<Recipe>

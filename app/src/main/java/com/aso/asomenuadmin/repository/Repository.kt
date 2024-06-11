@@ -1,6 +1,7 @@
 package com.aso.asomenuadmin.repository
 
 import com.aso.asomenuadmin.model.OrderResponse
+import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.model.ProductResponse
 import com.aso.asomenuadmin.model.Recipe
 import com.aso.asomenuadmin.network.AddRecipeRequest
@@ -29,6 +30,8 @@ interface Repository {
     suspend fun getProducts(search: String = ""): Flow<ApiState<ProductResponse>>
 
     suspend fun addProduct(addProductRequest: AddProductRequest): Flow<ApiState<AddProductResponse>>
+    suspend fun deleteProduct(productId: Int): Flow<ApiState<Unit>>
+    suspend fun updateProduct(productId: Int, product: Product): Flow<ApiState<Product>>
 }
 class RepositoryImpl @Inject constructor(
     private val apiService: ApiService,
@@ -78,6 +81,21 @@ class RepositoryImpl @Inject constructor(
     override suspend fun addProduct(addProductRequest: AddProductRequest): Flow<ApiState<AddProductResponse>> {
         return if (networkUtil.isNetworkConnected()) {
             apiRequestFlow { apiService.addProduct(addProductRequest) }
+        } else {
+            flow { emit(ApiState.Failure("No internet connection", -1)) }
+        }
+    }
+    override suspend fun deleteProduct(productId: Int): Flow<ApiState<Unit>> {
+        return if (networkUtil.isNetworkConnected()) {
+            apiRequestFlow { apiService.deleteProduct(productId.toInt()) }
+        } else {
+            flow { emit(ApiState.Failure("No internet connection", -1)) }
+        }
+    }
+
+    override suspend fun updateProduct(productId: Int, product: Product): Flow<ApiState<Product>> {
+        return if (networkUtil.isNetworkConnected()) {
+            apiRequestFlow { apiService.updateProduct(productId.toInt(), product) }
         } else {
             flow { emit(ApiState.Failure("No internet connection", -1)) }
         }

@@ -49,6 +49,6 @@ fun MenuAdminTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme, typography = Typography, content = content
+        colorScheme = colorScheme, typography = CustomTypography, content = content
     )
 }
