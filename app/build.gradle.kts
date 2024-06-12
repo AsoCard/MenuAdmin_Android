@@ -40,6 +40,16 @@ android {
             )
         }
     }
+    applicationVariants.all {
+        val appName = "RAHA Barista"
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val outputFileName = "$appName-${variant.baseName}-${variant.versionName}.apk"
+                output.outputFileName = outputFileName
+            }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
