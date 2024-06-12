@@ -29,16 +29,16 @@ class OrdersViewModel @Inject constructor(
 
     private var loginResponse: LoginResponse? = null
 
-    init {
-        tryLoginIfTokenNotExist()
-    }
+//    init {
+//        tryLoginIfTokenNotExist()
+//    }
 
-    private fun tryLoginIfTokenNotExist() {
+     fun tryLoginIfTokenNotExist(orderStatus: Int) {
         viewModelScope.launch {
             while (true) {
                 val tokenExists = tokenManager.tokenExists()
                 if (!tokenExists || _loginState.value !is ApiState.Success) {
-                    login("norouzi8446@gmail.com", "1")
+                    login("norouzi8446@gmail.com", "1",orderStatus)
                 }
                 delay(1000)
             }
@@ -51,7 +51,7 @@ class OrdersViewModel @Inject constructor(
                 when (apiState) {
                     is ApiState.Success -> {
                         Timber.d("Order status updated successfully")
-                        getOrders()
+                        getOrders(orderStatus)
                     }
 
                     is ApiState.Failure -> {
@@ -65,9 +65,9 @@ class OrdersViewModel @Inject constructor(
         }
     }
 
-     fun getOrders() {
+    fun getOrders(orderStatus: Int) {
         viewModelScope.launch {
-            repository.getOrders(orderStatus = 1).collect { apiState ->
+            repository.getOrders(orderStatus = orderStatus).collect { apiState ->
                 when (apiState) {
                     is ApiState.Success -> {
                         val newData = apiState.data
@@ -98,7 +98,7 @@ class OrdersViewModel @Inject constructor(
     }
 
 
-    private fun login(email: String, password: String) {
+    private fun login(email: String, password: String, orderStatus: Int) {
         _loginState.value = ApiState.Loading
         viewModelScope.launch {
             repository.login(email, password).collect { apiState ->
@@ -109,7 +109,7 @@ class OrdersViewModel @Inject constructor(
                         Timber.d("Login successful: $loginResponse")
                         storeToken(loginResponse)
                         // After successful login, start fetching orders
-                        fetchOrdersPeriodically()
+                        fetchOrdersPeriodically(orderStatus)
                     }
 
                     is ApiState.Failure -> {
@@ -134,10 +134,10 @@ class OrdersViewModel @Inject constructor(
         }
     }
 
-    private fun fetchOrdersPeriodically() {
+    private fun fetchOrdersPeriodically(orderStatus: Int) {
         viewModelScope.launch {
             while (true) {
-                getOrders()
+                getOrders(orderStatus)
                 delay(5000) // Fetch orders every 10 seconds
             }
         }

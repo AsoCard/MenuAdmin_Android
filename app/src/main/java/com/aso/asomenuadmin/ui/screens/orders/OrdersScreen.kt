@@ -15,6 +15,7 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -33,12 +34,16 @@ import kotlinx.coroutines.launch
 fun OrdersScreen(
     drawerState: DrawerState,
     viewModel: OrdersViewModel = hiltViewModel(),
-    onNavigateWithParam: (String, Long) -> Unit
+    onNavigateWithParam: (String, Long) -> Unit,
+    orderStatus : Int = 1
 ) {
     val coroutineScope = rememberCoroutineScope()
     val ordersState = viewModel.ordersState.collectAsState()
     var ordersList = emptyList<Order>()
 
+    LaunchedEffect(key1 = orderStatus) {
+        viewModel.tryLoginIfTokenNotExist(orderStatus)
+    }
     when (ordersState.value) {
         is ApiState.Loading -> {
             IconButton(onClick = { /*TODO*/ }) {
@@ -60,7 +65,7 @@ fun OrdersScreen(
                 .clip(CircleShape)
                 .background(LightBeige.copy(alpha = 0.3f))
                 .size(32.dp),
-                onClick = { viewModel.getOrders() }) {
+                onClick = { viewModel.getOrders(orderStatus) }) {
                 Icon(
                     modifier = Modifier.size(24.dp),
                     imageVector = Icons.Default.Refresh,
@@ -74,7 +79,7 @@ fun OrdersScreen(
                 .clip(CircleShape)
                 .background(LightBeige.copy(alpha = 0.3f))
                 .size(32.dp),
-                onClick = { viewModel.getOrders() }) {
+                onClick = { viewModel.getOrders(orderStatus) }) {
                 Icon(
 
                     imageVector = Icons.Default.Refresh, contentDescription = "Refresh"
@@ -87,7 +92,7 @@ fun OrdersScreen(
                 .clip(CircleShape)
                 .background(LightBeige.copy(alpha = 0.3f))
                 .size(32.dp),
-                onClick = { viewModel.getOrders() }) {
+                onClick = { viewModel.getOrders(orderStatus) }) {
                 Icon(
                     imageVector = Icons.Default.Refresh, contentDescription = "Refresh"
                 )

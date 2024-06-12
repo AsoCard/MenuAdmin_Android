@@ -130,12 +130,7 @@ private fun NavGraphBuilder.myNavGraph(
                 route, param, backStackEntry
             )
         })
-//        LoginScreen(
-//            onNavigateToSubScreen = onNavigateToAnySubScreen,
-//            backStackEntry = backStackEntry
-//        )
     }
-
     composable(
         route = "${MainDestinations.RECIPE_ROUTE}/{productId}",
         arguments = listOf(navArgument("productId") { type = NavType.LongType })
@@ -148,7 +143,7 @@ private fun NavGraphBuilder.myNavGraph(
 
     }
     composable(route = MainDestinations.ORDER_HISTORY_ROUTE) {
-        OrdersScreen(drawerState, onNavigateWithParam = { route, param ->
+        OrdersScreen(orderStatus =4 , drawerState = drawerState, onNavigateWithParam = { route, param ->
             onNavigateWithParam(
                 route, param, it
             )
