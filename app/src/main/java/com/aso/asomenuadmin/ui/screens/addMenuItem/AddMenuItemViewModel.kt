@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class AddMenuItemState(
+    val productId: Long? = null,
     val title: String = "",
     val subtitle: String = "",
     val description: String = "",
@@ -34,11 +35,13 @@ data class AddMenuItemState(
     val ideaImage: Bitmap? = null,
     val videoUri: Uri? = null,
     val mainImageUploadState: ApiState<ImageUploadResponse> = ApiState.Idle,
-    val ideaImageUploadState: ApiState<ImageUploadResponse> = ApiState.Idle,
+    val ideaImageUploadState: ApiState<ImageUploadResponse> =ApiState.Idle,
     val addProductState: ApiState<AddProductResponse> = ApiState.Idle,
     val addRecipeState: ApiState<AddRecipeResponse> = ApiState.Idle,
-    val imageIdsToUpload: MutableList<Int> = mutableListOf()
+    val imageIdsToUpload: MutableList<Int> = mutableListOf(),
 )
+
+
 
 sealed class AddMenuItemEvent {
     data class TitleChanged(val title: String) : AddMenuItemEvent()
@@ -64,6 +67,63 @@ class AddMenuItemViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(AddMenuItemState())
     val state: StateFlow<AddMenuItemState> get() = _state
+
+    fun initialize(productId: Long) {
+        if (productId > 0) {
+            viewModelScope.launch {
+                loadProductAndRecipe(productId)
+            }
+        }
+    }
+
+    private suspend fun loadProductAndRecipe(productId: Long) {
+        // Load product
+        repository.getProductById(productId.toInt()).collect { productState ->
+            when (productState) {
+                is ApiState.Success -> {
+                    val product = productState.data
+                    _state.value = _state.value.copy(
+                        title = product.name ?: "",
+                        description = product.detail ?: "",
+                        price = product.price?.toString() ?: "",
+                        category = product.category ?: ""
+                    )
+                }
+                is ApiState.Failure -> {
+                    Timber.e("Failed to load product: ${productState.message}")
+                }
+                ApiState.Loading -> {
+                    // Handle loading state if necessary
+                }
+                ApiState.Idle -> {
+                    // Handle idle state if necessary
+                }
+            }
+        }
+
+        // Load recipe
+        repository.getRecipe(productId).collect { recipeState ->
+            when (recipeState) {
+                is ApiState.Success -> {
+                    val recipe = recipeState.data.result
+                    _state.value = _state.value.copy(
+                        ingredients = recipe.ingredients ?: "",
+                        preparationMethod = recipe.steps ?: "",
+                        videoUri = recipe.video?.let { Uri.parse(it) }
+                    )
+                }
+                is ApiState.Failure -> {
+                    Timber.e("Failed to load recipe: ${recipeState.message}")
+                }
+                ApiState.Loading -> {
+                    // Handle loading state if necessary
+                }
+                ApiState.Idle -> {
+                    // Handle idle state if necessary
+                }
+            }
+        }
+    }
 
     fun handleEvent(event: AddMenuItemEvent) {
         when (event) {
@@ -100,6 +160,7 @@ class AddMenuItemViewModel @Inject constructor(
             is AddMenuItemEvent.AddRecipeClicked -> onAddRecipeClicked()
         }
     }
+
 
     private fun uploadMainImage(uri: Uri) {
         viewModelScope.launch {

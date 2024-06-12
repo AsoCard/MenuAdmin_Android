@@ -3,6 +3,7 @@ package com.aso.asomenuadmin.ui.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.aso.asomenuadmin.R
@@ -34,7 +36,8 @@ import com.aso.asomenuadmin.ui.theme.LightBeige
 @Composable
 fun ProductItem(
     product: Product,
-    onRecipeClick: (String) -> Unit
+    onRecipeClick: (String) -> Unit,
+    count: Int
 ) {
     val imageUrl = product.images.firstOrNull()?.image
 
@@ -64,6 +67,7 @@ fun ProductItem(
         Spacer(modifier = Modifier.width(8.dp))
 
         Column(
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp)
@@ -72,10 +76,16 @@ fun ProductItem(
                 text = product.name,
                 style = MaterialTheme.typography.titleLarge
             )
-            Text(text = product.detail ,
+            Text(text = product.price.toString() ,
                 style = MaterialTheme.typography.bodySmall
             )
         }
+        Text(
+            modifier = Modifier.align(Alignment.CenterVertically).padding(horizontal = 8.dp),
+            text = count.toString(),
+            fontSize = 20.sp,
+            style = MaterialTheme.typography.bodySmall
+        )
 
         Spacer(modifier = Modifier.width(8.dp))
         TextButton(

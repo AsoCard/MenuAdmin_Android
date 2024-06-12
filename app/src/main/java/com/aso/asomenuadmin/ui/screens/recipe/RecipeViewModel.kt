@@ -56,11 +56,11 @@ class RecipeViewModel @Inject constructor(
                 .collect { apiState ->
                     when (apiState) {
                         is ApiState.Success -> {
-                            val result = apiState.data
+                            val result = apiState.data.result
                             _state.value = RecipeState(
                                 title = result.title ?: "",
-                                ingredients = result.ingredients?.split(",")?.map { it.trim() } ?: emptyList(),
-                                steps = result.steps?.split(",")?.map { it.trim() } ?: emptyList(),
+                                ingredients = result.ingredients.split(",").map { it.trim() },
+                                steps = result.steps.split(",").map { it.trim() },
                                 imageUrl = result.img ?: "",
                                 videoUrl = result.video
                             )

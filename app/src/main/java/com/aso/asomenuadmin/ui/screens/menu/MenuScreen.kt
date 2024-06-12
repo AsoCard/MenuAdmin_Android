@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -116,9 +118,9 @@ fun ProductItem(
                 "http://api.420coffee.ir/media/product/images/Cappuccino_at_Sightglass_Coffee.jpg"
             }),
             contentDescription = product.name,
-            modifier = Modifier
+            modifier = Modifier.scale(1f)
                 .height(150.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth().clip(RoundedCornerShape(16.dp)),
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -132,9 +134,9 @@ fun ProductItem(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(onClick = { onEditProduct(product) }) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
-            }
+//            IconButton(onClick = { onEditProduct(product) }) {
+//                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+//            }
             IconButton(onClick = { onDeleteProduct(product.id) }) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
             }

@@ -19,8 +19,13 @@ data class Order(
     val updatedAt: String,
     val address: String,
     val status: Int, // Changed from String to Int
-    val des: String
-)
+    val des: String,
+    val count:List<Count>
+){
+    fun getProductCount(productId: Int): Int {
+        return count.find { it.id == productId }?.count ?: 1
+    }
+}
 
 data class User(
     @SerializedName("full_name")

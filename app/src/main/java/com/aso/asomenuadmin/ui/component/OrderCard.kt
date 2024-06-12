@@ -19,8 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aso.asomenuadmin.model.Order
 import com.aso.asomenuadmin.model.Product
@@ -65,6 +65,7 @@ fun OrderCard(
                         text = "میز شماره  $tableNumber",
                         style = MaterialTheme.typography.titleMedium
                     )
+                    Text(text = " تعداد : ${order.count.size}" )
                     Text(
                         text = "ساعت ثبت سفارش ${extractHourMinute(orderTime)}",
                          style = MaterialTheme.typography.bodySmall
@@ -75,18 +76,31 @@ fun OrderCard(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 productItems.forEach { productItem ->
-                    ProductItemRow(productItem = productItem,onNavigateWithParam = onNavigateWithParam)
+                    ProductItemRow(productItem = productItem,onNavigateWithParam = onNavigateWithParam,count= order.getProductCount(productItem.id))
 
                 }
-                Button(
-                    colors = ButtonDefaults.buttonColors().copy(containerColor = LightBeige),
-                    modifier = Modifier.align(Alignment.End).width(150.dp).height(33.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    onClick = {
-                    viewModel.updateOrderStatus(order.id, 4)
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)) {
+                    
+                    Text(modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 16.dp), text = order.des + " تومان " , fontSize = 20.sp)
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        colors = ButtonDefaults.buttonColors().copy(containerColor = LightBeige),
+                        modifier = Modifier
+                            .width(150.dp)
+                            .align(Alignment.CenterVertically)
+                            .height(33.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        onClick = {
+                            viewModel.updateOrderStatus(order.id, 4)
 
-                }) {
-                    Text(color = Brown,text = "آماده تحویل")
+                        }) {
+                        Text(color = Brown,text = "آماده تحویل")
+                    }
                 }
             }
         }
@@ -99,6 +113,7 @@ fun ProductItemRow(
     productItem: Product,
     modifier: Modifier = Modifier,
     onNavigateWithParam: (String, Long) -> Unit,
+    count: Int,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -108,13 +123,13 @@ fun ProductItemRow(
         ProductItem(
             productItem, onRecipeClick = {
                 onNavigateWithParam(MainDestinations.RECIPE_ROUTE, productItem.id.toLong(),)
-            }
+            },count
         )
 
     }
 }
 fun extractHourMinute(dateTimeString: String): String {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     val offsetDateTime = OffsetDateTime.parse(dateTimeString, formatter)
     val hourMinute = offsetDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
     return hourMinute

@@ -149,20 +149,25 @@ private fun NavGraphBuilder.myNavGraph(
             )
         })
     }
-    composable(route = MainDestinations.ADD_MENU_ITEM_ROUTE) {
-        AddMenuItemScreen(onUpPress = upPress)
+    composable(
+        route = MainDestinations.ADD_MENU_ITEM_ROUTE,
+    ) {
+        AddMenuItemScreen(productId = -1, onUpPress = upPress)
+    }
+    composable(
+        route = "${MainDestinations.EDIT_MENU_ITEM_ROUTE}/{productId}",
+        arguments = listOf(navArgument("productId") { type = NavType.LongType })
+    ) {
+        val productId = it.arguments?.getLong("productId") ?: return@composable
+        AddMenuItemScreen(productId = productId, onUpPress = upPress)
     }
     composable(route = MainDestinations.MENU_LIST_ROUTE) {navbs->
         MenuScreen(
             onNavigateToAddProduct = { onNavigateToAnySubScreen(MainDestinations.ADD_MENU_ITEM_ROUTE,
                 navbs
             )
-            },
-            onNavigateToEditProduct = {
-                onNavigateToAnySubScreen(
-                    MainDestinations.ADD_MENU_ITEM_ROUTE,
-                    navbs
-                )
+            }, onNavigateToEditProduct = {
+                onNavigateWithParam(MainDestinations.EDIT_MENU_ITEM_ROUTE, it.id.toLong(),navbs)
             }
         )
     }

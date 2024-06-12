@@ -19,6 +19,7 @@ object MainDestinations {
     const val ORDER_HISTORY_ROUTE = "order_history"
     const val RECIPE_ROUTE = "recipe"
     const val ADD_MENU_ITEM_ROUTE = "add_menu_item"
+    const val EDIT_MENU_ITEM_ROUTE = "edit_menu_item"
     const val MENU_ITEM_ROUTE = "menu_item"
     const val MENU_LIST_ROUTE = "menu_list"
     const val ADD_MENU_CATEGORY_ROUTE= "menu_category"

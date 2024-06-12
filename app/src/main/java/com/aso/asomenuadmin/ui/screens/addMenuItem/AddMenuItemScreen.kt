@@ -32,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,9 +48,16 @@ import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 
 @Composable
-fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel(), onUpPress: () -> Unit) {
+fun AddMenuItemScreen(
+    viewModel: AddMenuItemViewModel = hiltViewModel(),
+    onUpPress: () -> Unit,
+    productId: Long
+) {
     val state by viewModel.state.collectAsState()
 
+    LaunchedEffect(productId) {
+        viewModel.initialize(productId)
+    }
     val galleryLauncherMain =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let { viewModel.handleEvent(AddMenuItemEvent.MainImageChanged(it)) }
@@ -147,13 +155,6 @@ fun AddMenuItemScreen(viewModel: AddMenuItemViewModel = hiltViewModel(), onUpPre
         ) {
             Text(text = "ثبت آیتم منو")
         }
-
-//        Button(
-//            onClick = { viewModel.handleEvent(AddMenuItemEvent.AddRecipeClicked) },
-//            modifier = Modifier.align(Alignment.CenterHorizontally)
-//        ) {
-//            Text(text = "ثبت دستور غذا")
-//        }
     }
 }
 

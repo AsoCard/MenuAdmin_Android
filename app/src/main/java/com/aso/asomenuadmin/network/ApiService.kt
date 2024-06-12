@@ -67,9 +67,14 @@ interface ApiService {
     suspend fun deleteProduct(@Path("id") id: Int): Response<Unit>
 
     @GET("products/recepie/{productId}")
-    suspend fun getRecipe(@Path("productId") productId: Long):Response<Recipe>
-    @POST("/api/products/recepie/add/")
+    suspend fun getRecipe(@Path("productId") productId: Long):Response<AddRecipeResponse>
+    @POST("products/recepie/add/")
     suspend fun addRecipe(@Body addRecipeRequest: AddRecipeRequest): Response<AddRecipeResponse>
+    @DELETE("products/recepie/detail/{productId}")
+    suspend fun deleteRecipe(@Path("productId") productId: Long): Response<Unit>
+    @PUT("products/recepie/detail/{productId}")
+    suspend fun updateRecipe(@Path("productId") productId: Long,@Body addRecipeRequest: AddRecipeRequest): Response<AddRecipeResponse>
+
     @Multipart
     @POST("products/img-add/")
     suspend fun uploadImage(@Part image: MultipartBody.Part): Response<ImageUploadResponse>
