@@ -40,7 +40,7 @@ class OrdersViewModel @Inject constructor(
                 if (!tokenExists || _loginState.value !is ApiState.Success) {
                     login("norouzi8446@gmail.com", "1",orderStatus)
                 }
-                delay(1000)
+                delay(10000)
             }
         }
     }
@@ -51,7 +51,7 @@ class OrdersViewModel @Inject constructor(
                 when (apiState) {
                     is ApiState.Success -> {
                         Timber.d("Order status updated successfully")
-                        getOrders(orderStatus)
+                        getOrders(1)
                     }
 
                     is ApiState.Failure -> {
@@ -138,7 +138,7 @@ class OrdersViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 getOrders(orderStatus)
-                delay(5000) // Fetch orders every 10 seconds
+                delay(500000) // Fetch orders every 10 seconds
             }
         }
     }

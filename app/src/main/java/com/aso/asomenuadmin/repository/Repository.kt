@@ -3,13 +3,14 @@ package com.aso.asomenuadmin.repository
 import com.aso.asomenuadmin.model.OrderResponse
 import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.model.ProductResponse
-import com.aso.asomenuadmin.network.AddRecipeRequest
+import com.aso.asomenuadmin.network.entities.AddRecipeRequest
 import com.aso.asomenuadmin.network.ApiService
 import com.aso.asomenuadmin.network.apiRequestFlow
 import com.aso.asomenuadmin.network.entities.AddProductRequest
 import com.aso.asomenuadmin.network.entities.AddProductResponse
 import com.aso.asomenuadmin.network.entities.AddRecipeResponse
 import com.aso.asomenuadmin.network.entities.ApiState
+import com.aso.asomenuadmin.network.entities.GetRecipeResponse
 import com.aso.asomenuadmin.network.entities.LoginRequest
 import com.aso.asomenuadmin.network.entities.LoginResponse
 import com.aso.asomenuadmin.network.util.NetworkUtil
@@ -20,7 +21,7 @@ import javax.inject.Inject
 interface Repository {
     //    suspend fun fetchData(): List<Product>
     fun login(email: String, password: String): Flow<ApiState<LoginResponse>>
-    fun getRecipe(productId: Long): Flow<ApiState<AddRecipeResponse>>
+    fun getRecipe(productId: Int): Flow<ApiState<GetRecipeResponse>>
     suspend fun addRecipe(addRecipeRequest: AddRecipeRequest): Flow<ApiState<AddRecipeResponse>>
     suspend fun deleteRecipe(recipeId: Int): Flow<ApiState<Unit>>
     suspend fun updateRecipe(
@@ -109,7 +110,7 @@ class RepositoryImpl @Inject constructor(
     }
     override suspend fun deleteRecipe(recipeId: Int): Flow<ApiState<Unit>> {
         return if (networkUtil.isNetworkConnected()) {
-            apiRequestFlow { apiService.deleteRecipe(recipeId.toLong()) }
+            apiRequestFlow { apiService.deleteRecipe(recipeId) }
         } else {
             flow { emit(ApiState.Failure("No internet connection", -1)) }
         }
@@ -119,13 +120,13 @@ class RepositoryImpl @Inject constructor(
         recipeId: Int, addRecipeRequest: AddRecipeRequest
     ): Flow<ApiState<AddRecipeResponse>> {
         return if (networkUtil.isNetworkConnected()) {
-            apiRequestFlow { apiService.updateRecipe(recipeId.toLong(), addRecipeRequest) }
+            apiRequestFlow { apiService.updateRecipe(recipeId, addRecipeRequest) }
         } else {
             flow { emit(ApiState.Failure("No internet connection", -1)) }
         }
     }
 
-    override fun getRecipe(productId: Long): Flow<ApiState<AddRecipeResponse>> {
+    override fun getRecipe(productId: Int): Flow<ApiState<GetRecipeResponse>> {
         return if (networkUtil.isNetworkConnected()) {
             apiRequestFlow { apiService.getRecipe(productId) }
         } else {

@@ -21,7 +21,7 @@ data class RecipeState(
 )
 
 sealed class RecipeIntent {
-    data class LoadRecipe(val productId: Long) : RecipeIntent()
+    data class LoadRecipe(val productId: Int) : RecipeIntent()
 }
 
 @HiltViewModel
@@ -38,7 +38,7 @@ class RecipeViewModel @Inject constructor(
         }
     }
 
-    private fun loadRecipe(productId: Long) {
+    private fun loadRecipe(productId: Int) {
         viewModelScope.launch {
             repository.getRecipe(productId)
                 .catch { e ->
@@ -61,7 +61,7 @@ class RecipeViewModel @Inject constructor(
                                 title = result.title ?: "",
                                 ingredients = result.ingredients.split(",").map { it.trim() },
                                 steps = result.steps.split(",").map { it.trim() },
-                                imageUrl = result.img ?: "",
+                                imageUrl = result.images[0].image ?: "",
                                 videoUrl = result.video
                             )
                             Timber.d("Recipe: $result")

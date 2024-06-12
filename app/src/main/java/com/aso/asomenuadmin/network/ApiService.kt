@@ -4,10 +4,11 @@ import com.aso.asomenuadmin.model.Menu
 import com.aso.asomenuadmin.model.OrderResponse
 import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.model.ProductResponse
-import com.aso.asomenuadmin.model.Recipe
 import com.aso.asomenuadmin.network.entities.AddProductRequest
 import com.aso.asomenuadmin.network.entities.AddProductResponse
+import com.aso.asomenuadmin.network.entities.AddRecipeRequest
 import com.aso.asomenuadmin.network.entities.AddRecipeResponse
+import com.aso.asomenuadmin.network.entities.GetRecipeResponse
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 import com.aso.asomenuadmin.network.entities.LoginRequest
 import com.aso.asomenuadmin.network.entities.LoginResponse
@@ -67,13 +68,15 @@ interface ApiService {
     suspend fun deleteProduct(@Path("id") id: Int): Response<Unit>
 
     @GET("products/recepie/{productId}")
-    suspend fun getRecipe(@Path("productId") productId: Long):Response<AddRecipeResponse>
+    suspend fun getRecipe(@Path("productId") productId: Int): Response<GetRecipeResponse>
     @POST("products/recepie/add/")
     suspend fun addRecipe(@Body addRecipeRequest: AddRecipeRequest): Response<AddRecipeResponse>
     @DELETE("products/recepie/detail/{productId}")
-    suspend fun deleteRecipe(@Path("productId") productId: Long): Response<Unit>
+    suspend fun deleteRecipe(@Path("productId") productId: Int): Response<Unit>
     @PUT("products/recepie/detail/{productId}")
-    suspend fun updateRecipe(@Path("productId") productId: Long,@Body addRecipeRequest: AddRecipeRequest): Response<AddRecipeResponse>
+    suspend fun updateRecipe(
+        @Path("productId") productId: Int, @Body addRecipeRequest: AddRecipeRequest
+    ): Response<AddRecipeResponse>
 
     @Multipart
     @POST("products/img-add/")

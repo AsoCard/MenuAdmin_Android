@@ -51,7 +51,7 @@ fun RecipeScreen(
             .build())
 
     LaunchedEffect(productId) {
-        viewModel.handleIntent(RecipeIntent.LoadRecipe(productId))
+        viewModel.handleIntent(RecipeIntent.LoadRecipe(productId.toInt()))
     }
 
     Box(
@@ -93,7 +93,7 @@ fun RecipeScreen(
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
-        Text(text = state.title, style = MaterialTheme.typography.bodySmall)
+//        Text(text = state.title, style = MaterialTheme.typography.bodySmall)
 
         Image(
             painter = painter,

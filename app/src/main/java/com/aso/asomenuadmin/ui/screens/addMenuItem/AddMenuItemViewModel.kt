@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aso.asomenuadmin.network.AddRecipeRequest
+import com.aso.asomenuadmin.network.entities.AddRecipeRequest
 import com.aso.asomenuadmin.network.entities.AddProductRequest
 import com.aso.asomenuadmin.network.entities.AddProductResponse
 import com.aso.asomenuadmin.network.entities.AddRecipeResponse
@@ -29,8 +29,8 @@ data class AddMenuItemState(
     val ingredients: String = "",
     val preparationMethod: String = "",
     val servingMethod: String = "",
-    val price: String = "",
-    val category: String = "",
+    val price: Int = 0,
+    val category: Int =-1,
     val mainImage: Bitmap? = null,
     val ideaImage: Bitmap? = null,
     val videoUri: Uri? = null,
@@ -51,12 +51,12 @@ sealed class AddMenuItemEvent {
     data class PreparationMethodChanged(val preparationMethod: String) : AddMenuItemEvent()
     data class ServingMethodChanged(val servingMethod: String) : AddMenuItemEvent()
     data class PriceChanged(val price: String) : AddMenuItemEvent()
-    data class CategoryChanged(val category: String) : AddMenuItemEvent()
+    data class CategoryChanged(val category: Int) : AddMenuItemEvent()
     data class MainImageChanged(val uri: Uri) : AddMenuItemEvent()
     data class IdeaImageChanged(val uri: Uri) : AddMenuItemEvent()
     data class VideoUriChanged(val uri: Uri) : AddMenuItemEvent()
     object Submit : AddMenuItemEvent()
-    object AddRecipeClicked : AddMenuItemEvent()
+    data class AddRecipeClicked(val id: Int) : AddMenuItemEvent()
 }
 
 @HiltViewModel
@@ -71,59 +71,59 @@ class AddMenuItemViewModel @Inject constructor(
     fun initialize(productId: Long) {
         if (productId > 0) {
             viewModelScope.launch {
-                loadProductAndRecipe(productId)
+//                loadProductAndRecipe(productId)
             }
         }
     }
 
-    private suspend fun loadProductAndRecipe(productId: Long) {
-        // Load product
-        repository.getProductById(productId.toInt()).collect { productState ->
-            when (productState) {
-                is ApiState.Success -> {
-                    val product = productState.data
-                    _state.value = _state.value.copy(
-                        title = product.name ?: "",
-                        description = product.detail ?: "",
-                        price = product.price?.toString() ?: "",
-                        category = product.category ?: ""
-                    )
-                }
-                is ApiState.Failure -> {
-                    Timber.e("Failed to load product: ${productState.message}")
-                }
-                ApiState.Loading -> {
-                    // Handle loading state if necessary
-                }
-                ApiState.Idle -> {
-                    // Handle idle state if necessary
-                }
-            }
-        }
-
-        // Load recipe
-        repository.getRecipe(productId).collect { recipeState ->
-            when (recipeState) {
-                is ApiState.Success -> {
-                    val recipe = recipeState.data.result
-                    _state.value = _state.value.copy(
-                        ingredients = recipe.ingredients ?: "",
-                        preparationMethod = recipe.steps ?: "",
-                        videoUri = recipe.video?.let { Uri.parse(it) }
-                    )
-                }
-                is ApiState.Failure -> {
-                    Timber.e("Failed to load recipe: ${recipeState.message}")
-                }
-                ApiState.Loading -> {
-                    // Handle loading state if necessary
-                }
-                ApiState.Idle -> {
-                    // Handle idle state if necessary
-                }
-            }
-        }
-    }
+//    private suspend fun loadProductAndRecipe(productId: Long) {
+//        // Load product
+//        repository.getProductById(productId.toInt()).collect { productState ->
+//            when (productState) {
+//                is ApiState.Success -> {
+//                    val product = productState.data
+//                    _state.value = _state.value.copy(
+//                        title = product.name ?: "",
+//                        description = product.detail ?: "",
+//                        price = product.price?.toString() ?: "",
+//                        category = product.category ?: ""
+//                    )
+//                }
+//                is ApiState.Failure -> {
+//                    Timber.e("Failed to load product: ${productState.message}")
+//                }
+//                ApiState.Loading -> {
+//                    // Handle loading state if necessary
+//                }
+//                ApiState.Idle -> {
+//                    // Handle idle state if necessary
+//                }
+//            }
+//        }
+//
+//        // Load recipe
+//        repository.getRecipe(productId).collect { recipeState ->
+//            when (recipeState) {
+//                is ApiState.Success -> {
+//                    val recipe = recipeState.data.result
+//                    _state.value = _state.value.copy(
+//                        ingredients = recipe.ingredients ?: "",
+//                        preparationMethod = recipe.steps ?: "",
+//                        videoUri = recipe.video?.let { Uri.parse(it) }
+//                    )
+//                }
+//                is ApiState.Failure -> {
+//                    Timber.e("Failed to load recipe: ${recipeState.message}")
+//                }
+//                ApiState.Loading -> {
+//                    // Handle loading state if necessary
+//                }
+//                ApiState.Idle -> {
+//                    // Handle idle state if necessary
+//                }
+//            }
+//        }
+//    }
 
     fun handleEvent(event: AddMenuItemEvent) {
         when (event) {
@@ -146,7 +146,7 @@ class AddMenuItemViewModel @Inject constructor(
                 _state.value.copy(servingMethod = event.servingMethod)
 
             is AddMenuItemEvent.PriceChanged -> _state.value =
-                _state.value.copy(price = event.price)
+                _state.value.copy(price = event.price.toInt())
 
             is AddMenuItemEvent.CategoryChanged -> _state.value =
                 _state.value.copy(category = event.category)
@@ -157,7 +157,8 @@ class AddMenuItemViewModel @Inject constructor(
                 _state.value.copy(videoUri = event.uri)
 
             is AddMenuItemEvent.Submit -> onSubmit()
-            is AddMenuItemEvent.AddRecipeClicked -> onAddRecipeClicked()
+            is AddMenuItemEvent.AddRecipeClicked -> onAddRecipeClicked(event.id)
+//            is AddMenuItemEvent.AddRecipeClicked -> Timber.d("AddRecipeClicked: ${event.id}")
         }
     }
 
@@ -208,24 +209,34 @@ class AddMenuItemViewModel @Inject constructor(
     }
 
     private fun onSubmit() {
-        onAddRecipeClicked()
         viewModelScope.launch {
             repository.addProduct(
                 AddProductRequest(
-                    category = 1,
+                    category = state.value.category,
                     images = state.value.imageIdsToUpload,
                     name = state.value.title,
                     detail = state.value.description,
-                    price = state.value.price.toDoubleOrNull() ?: 0.0,
+                    price = state.value.price,
                     ingredients = state.value.ingredients
                 )
             ).collect { apiState ->
                 _state.value = _state.value.copy(addProductState = apiState)
+
+                when(apiState){
+                    is ApiState.Failure -> Timber.e("Failure: ${apiState.message}")
+                    is ApiState.Idle -> Timber.d("Idle...")
+                    is ApiState.Loading -> Timber.d("Loading...")
+                    is ApiState.Success -> {
+                        Timber.d("Success: ${apiState.data.result}")
+                        onAddRecipeClicked(apiState.data.result.id)
+
+                    }
+                }
             }
         }
     }
 
-    private fun onAddRecipeClicked() {
+    private fun onAddRecipeClicked(id: Int) {
         viewModelScope.launch {
             repository.addRecipe(
                 AddRecipeRequest(
@@ -233,9 +244,9 @@ class AddMenuItemViewModel @Inject constructor(
                     title = state.value.title,
                     ingredients = state.value.ingredients,
                     steps = state.value.preparationMethod,
-                    img = state.value.mainImage?.toString(),
+                    images = state.value.imageIdsToUpload,
                     video = state.value.videoUri?.toString(),
-                    product = 0L // Replace with actual product ID
+                    product = id
                 )
             ).collect { apiState ->
                 _state.value = _state.value.copy(addRecipeState = apiState)

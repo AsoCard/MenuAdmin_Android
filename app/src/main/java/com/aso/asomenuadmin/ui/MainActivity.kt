@@ -168,7 +168,8 @@ private fun NavGraphBuilder.myNavGraph(
             )
             }, onNavigateToEditProduct = {
                 onNavigateWithParam(MainDestinations.EDIT_MENU_ITEM_ROUTE, it.id.toLong(),navbs)
-            }
+            },
+            drawerState = drawerState
         )
     }
 }

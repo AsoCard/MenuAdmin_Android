@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -40,12 +41,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
+import com.aso.asomenuadmin.ui.theme.BlackBrown
+import com.aso.asomenuadmin.ui.theme.LightBeige
 
 @Composable
 fun AddMenuItemScreen(
@@ -120,7 +124,7 @@ fun AddMenuItemScreen(
         )
         AddMenuItemInputField(
             label = "قیمت",
-            value = state.price,
+            value = state.price.toString(),
             onValueChange = { viewModel.handleEvent(AddMenuItemEvent.PriceChanged(it)) }
         )
 
@@ -148,7 +152,11 @@ fun AddMenuItemScreen(
         Button(
             onClick = {
                 viewModel.handleEvent(AddMenuItemEvent.Submit)
-                viewModel.handleEvent(AddMenuItemEvent.AddRecipeClicked)
+//                viewModel.handleEvent(
+//                    AddMenuItemEvent.AddRecipeClicked(
+//                        state.productId?.toInt() ?: 0
+//                    )
+//                )
                 onUpPress.invoke()
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -177,11 +185,10 @@ fun AddMenuItemInputField(label: String, value: String, onValueChange: (String) 
         )
     )
 }
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddCategoryDropdown(selectedCategory: String, onCategorySelected: (String) -> Unit) {
+fun AddCategoryDropdown(selectedCategory: Int, onCategorySelected: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    val categories = listOf("Category 1", "Category 2", "Category 3")
+    val categories = listOf("نوشیدنی گرم", "نوشیدنی سرد", "کیک", "بیرون بر")
 
     Column(
         modifier = Modifier
@@ -202,8 +209,8 @@ fun AddCategoryDropdown(selectedCategory: String, onCategorySelected: (String) -
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = selectedCategory.ifEmpty { "دسته بندی" },
-                    color = if (selectedCategory.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                    text = if (selectedCategory == -1) { "دسته بندی" } else categories[selectedCategory],
+                    color = if (selectedCategory== -1) Color.Gray else MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f)
                 )
@@ -220,11 +227,12 @@ fun AddCategoryDropdown(selectedCategory: String, onCategorySelected: (String) -
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            categories.forEach { category ->
+            categories.forEachIndexed { index,category ->
                 DropdownMenuItem(
                     text = { Text(text = category) },
                     onClick = {
-                        onCategorySelected(category)
+                        // ADDED BY 3 TO MATCH SERVER IDS OF CATEGORY
+                        onCategorySelected(index+3)
                         expanded = false
                     }, modifier = Modifier
                         .fillMaxWidth()
@@ -255,7 +263,8 @@ fun AddImageSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .background(Color.Gray)
+                .clip(RoundedCornerShape(16.dp))
+                .background(LightBeige)
                 .clickable { onImageClick() },
             contentAlignment = Alignment.Center
         ) {
@@ -266,13 +275,13 @@ fun AddImageSection(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                Text(text = "Tap to add image", color = Color.White)
+                Text(text = "برای افزودن عکس لمس کنید", color = BlackBrown)
             }
         }
         when (uploadState) {
             is ApiState.Loading -> CircularProgressIndicator()
-            is ApiState.Failure -> Text("Upload Failed", color = Color.Red)
-            is ApiState.Success -> Text("Upload Success", color = Color.Green)
+            is ApiState.Failure -> Text("اپلود ناموفق", color = Color.Red)
+            is ApiState.Success -> Text("آپلود موفق", color = Color.Green)
             else -> {}
         }
     }

@@ -9,7 +9,7 @@ data class AddProductRequest(
     @SerializedName("name") val name: String,
     @SerializedName("detail") val detail: String,
     @SerializedName("ingredients") val ingredients: String,
-    @SerializedName("price") val price: Double
+    @SerializedName("price") val price: Int
 )
 
 

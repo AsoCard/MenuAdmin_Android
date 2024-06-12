@@ -50,6 +50,8 @@ class MenuViewModel @Inject constructor(
             repository.getProducts().collect { apiState ->
                 when (apiState) {
                     is ApiState.Success -> {
+                        Timber.d("Products S")
+
                         _state.value = _state.value.copy(
                             products = apiState.data.result,
                             isLoading = false,
@@ -57,6 +59,8 @@ class MenuViewModel @Inject constructor(
                         )
                     }
                     is ApiState.Failure -> {
+                        Timber.d("Products FAIL")
+
                         _state.value = _state.value.copy(
                             isLoading = false,
                             error = apiState.message
