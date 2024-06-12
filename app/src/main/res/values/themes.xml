@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.MenuAdmin" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.MenuAdmin.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FF46312A</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.MenuAdmin</item>
+
+    </style>
 </resources>

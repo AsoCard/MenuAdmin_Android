@@ -20,6 +20,7 @@ timber = "5.0.1"
 coil = "2.0.0"
 hiltNavigation="1.2.0"
 zelory-compressor = "3.0.1"
+splashscreen = "1.0.1"
 
 
 
@@ -55,6 +56,7 @@ ksp-symbol-processing = { group = "com.google.devtools.ksp", name = "symbol-proc
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 zelory-compressor = { group = "id.zelory", name = "compressor", version.ref = "zelory-compressor" }
+splash-screen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
 
 [plugins]

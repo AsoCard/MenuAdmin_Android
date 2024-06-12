@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MenuAdmin</string>
+    <string name="app_name" translatable="false">RAHA Barista</string>
     <string name="orders">سفارشات</string>
     <string name="menu">منو</string>
     <string name="order_history">تاریخچه سفارشات</string>
