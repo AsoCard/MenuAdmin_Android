@@ -41,9 +41,9 @@ fun OrderCard(
     val tableNumber = order.address
     val orderTime = order.createdAt
     val productItems = order.products
-    if (productItems.isNullOrEmpty()) {
+    if (productItems.isEmpty()) {
         // Handle the case where productItems is null or empty
-        Text("No product items found.")
+//        Text("No product items found.")
     } else {
         Card(
             colors = CardDefaults.cardColors().copy(

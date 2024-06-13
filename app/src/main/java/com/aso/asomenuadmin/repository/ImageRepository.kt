@@ -5,13 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import com.aso.asomenuadmin.network.ApiService
-import com.aso.asomenuadmin.network.apiRequestFlow
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
 import com.aso.asomenuadmin.network.util.FileUtil
 import com.aso.asomenuadmin.network.util.NetworkUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
-import id.zelory.compressor.Compressor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -49,21 +47,28 @@ class ImageRepository @Inject constructor(
         }
     }
 
-    suspend fun uploadImage(imageUri: Uri): Flow<ApiState<ImageUploadResponse>> {
-        val bitmap = compressImage(imageUri) ?: return flow {
-            emit(ApiState.Failure("Image compression failed", -1))
-        }
+    suspend fun uploadImage(imageUri: Uri): Flow<ApiState<ImageUploadResponse>> = flow {
+        try {
+            val file = File(context.cacheDir, "temp_image.jpg")
+            FileUtil.copyUriToFile(context, imageUri, file)
 
-        val file = File(context.cacheDir, "temp_image.jpg")
-        FileUtil.copyUriToFile(context, imageUri, file)
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
 
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
-
-        return if (networkUtil.isNetworkConnected()) {
-            apiRequestFlow { apiService.uploadImage(body) }
-        } else {
-            flow { emit(ApiState.Failure("No internet connection", -1)) }
+            if (networkUtil.isNetworkConnected()) {
+                val response = apiService.uploadImage(body)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        emit(ApiState.Success(it))
+                    } ?: emit(ApiState.Failure("Empty response body", response.code()))
+                } else {
+                    emit(ApiState.Failure("Upload failed: ${response.message()}", response.code()))
+                }
+            } else {
+                emit(ApiState.Failure("No internet connection", -1))
+            }
+        } catch (e: Exception) {
+            emit(ApiState.Failure("Exception: ${e.message}", -1))
         }
     }
 }

@@ -2,8 +2,8 @@ package com.aso.asomenuadmin.ui.screens.menu
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.model.Category
+import com.aso.asomenuadmin.model.Product
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -29,6 +28,7 @@ class MenuViewModel @Inject constructor(
 
     init {
         handleIntents()
+
         sendIntent(MenuIntent.LoadProducts)
     }
 

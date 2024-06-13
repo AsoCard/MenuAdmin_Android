@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,7 +57,9 @@ fun MenuScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(MenuIntent.LoadProducts)
+    }
     Scaffold(
         topBar = {
 //                    ordersList = (ordersState.value as ApiState.Success<OrderResponse>).data.result

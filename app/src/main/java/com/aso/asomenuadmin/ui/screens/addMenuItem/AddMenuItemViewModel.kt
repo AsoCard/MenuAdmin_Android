@@ -4,9 +4,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aso.asomenuadmin.network.entities.AddRecipeRequest
 import com.aso.asomenuadmin.network.entities.AddProductRequest
 import com.aso.asomenuadmin.network.entities.AddProductResponse
+import com.aso.asomenuadmin.network.entities.AddRecipeRequest
 import com.aso.asomenuadmin.network.entities.AddRecipeResponse
 import com.aso.asomenuadmin.network.entities.ApiState
 import com.aso.asomenuadmin.network.entities.ImageUploadResponse
@@ -212,7 +212,9 @@ class AddMenuItemViewModel @Inject constructor(
         viewModelScope.launch {
             repository.addProduct(
                 AddProductRequest(
-                    category = state.value.category,
+
+                    // whatch this plus 3 add to index beacuse of server
+                    category = state.value.category+3,
                     images = state.value.imageIdsToUpload,
                     name = state.value.title,
                     detail = state.value.description,

@@ -44,7 +44,6 @@ class RecipeViewModel @Inject constructor(
                 .catch { e ->
                     Timber.e(e, "Error loading recipe")
                     // Emit a failure state or handle the error accordingly
-                    // Example of setting an error state:
                     _state.value = RecipeState(
                         title = "Error",
                         ingredients = emptyList(),
@@ -57,11 +56,13 @@ class RecipeViewModel @Inject constructor(
                     when (apiState) {
                         is ApiState.Success -> {
                             val result = apiState.data.result
+                            val imageUrl = result.images.firstOrNull()?.image ?: ""
+
                             _state.value = RecipeState(
                                 title = result.title ?: "",
-                                ingredients = result.ingredients.split(",").map { it.trim() },
+                                ingredients = result.ingredients.split("،").map { it.trim() },
                                 steps = result.steps.split(",").map { it.trim() },
-                                imageUrl = result.images[0].image ?: "",
+                                imageUrl = imageUrl,
                                 videoUrl = result.video
                             )
                             Timber.d("Recipe: $result")

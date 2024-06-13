@@ -5,23 +5,21 @@ import android.net.Uri
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.io.OutputStream
 
 
 object FileUtil {
-    fun copyUriToFile(context: Context, uri: Uri, file: File): Boolean {
-        return try {
-            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-            val outputStream: OutputStream = FileOutputStream(file)
-            inputStream?.use { input ->
-                outputStream.use { output ->
-                    input.copyTo(output)
-                }
-            }
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
+    fun copyUriToFile(context: Context, uri: Uri, file: File) {
+        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+        val outputStream: FileOutputStream = FileOutputStream(file)
+        val buffer = ByteArray(1024)
+        var length: Int
+
+        while (inputStream?.read(buffer).also { length = it!! }!! > 0) {
+            outputStream.write(buffer, 0, length)
         }
+
+        outputStream.flush()
+        outputStream.close()
+        inputStream?.close()
     }
 }
