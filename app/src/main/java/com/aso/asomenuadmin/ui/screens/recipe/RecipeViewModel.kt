@@ -61,7 +61,7 @@ class RecipeViewModel @Inject constructor(
                             _state.value = RecipeState(
                                 title = result.title ?: "",
                                 ingredients = result.ingredients.split("،").map { it.trim() },
-                                steps = result.steps.split(",").map { it.trim() },
+                                steps = result.steps.split("،").map { it.trim() },
                                 imageUrl = imageUrl,
                                 videoUrl = result.video
                             )

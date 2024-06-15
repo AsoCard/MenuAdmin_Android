@@ -129,7 +129,7 @@ fun ProductItemRow(
     }
 }
 fun extractHourMinute(dateTimeString: String): String {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXXXX")
     val offsetDateTime = OffsetDateTime.parse(dateTimeString, formatter)
     val hourMinute = offsetDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
     return hourMinute
