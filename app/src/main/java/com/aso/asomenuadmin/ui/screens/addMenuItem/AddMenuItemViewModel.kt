@@ -145,9 +145,10 @@ class AddMenuItemViewModel @Inject constructor(
             is AddMenuItemEvent.ServingMethodChanged -> _state.value =
                 _state.value.copy(servingMethod = event.servingMethod)
 
-            is AddMenuItemEvent.PriceChanged -> _state.value =
-                _state.value.copy(price = event.price.toInt())
-
+            is AddMenuItemEvent.PriceChanged -> {
+                val price = event.price.toIntOrNull() ?: 0
+                _state.value = _state.value.copy(price = price)
+            }
             is AddMenuItemEvent.CategoryChanged -> _state.value =
                 _state.value.copy(category = event.category)
 

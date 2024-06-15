@@ -205,12 +205,17 @@ fun AddMenuItemInputField(
         value = value,
         onValueChange = {
             if (isPriceField) {
-                try {
-                    it.toInt()
+                if (it.isEmpty()) {
                     errorMessage = ""
-                    onValueChange(it)
-                } catch (e: NumberFormatException) {
-                    errorMessage = "قیمت باید عدد باشد"
+                    onValueChange("0") // Set value to "0" when empty
+                } else {
+                    try {
+                        it.toInt()
+                        errorMessage = ""
+                        onValueChange(it)
+                    } catch (e: NumberFormatException) {
+                        errorMessage = "قیمت باید عدد باشد"
+                    }
                 }
             } else {
                 errorMessage = ""
@@ -252,6 +257,8 @@ fun AddMenuItemInputField(
         )
     }
 }
+
+
 
 @Composable
 fun AddCategoryDropdown(selectedCategory: Int, onCategorySelected: (Int) -> Unit) {
