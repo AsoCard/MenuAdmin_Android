@@ -91,9 +91,9 @@ fun OrderCard(
                     Button(
                         colors = ButtonDefaults.buttonColors().copy(containerColor = LightBeige),
                         modifier = Modifier
-                            .width(150.dp)
+                            .width(180.dp)
                             .align(Alignment.CenterVertically)
-                            .height(33.dp),
+                            .height(35.dp),
                         shape = RoundedCornerShape(8.dp),
                         onClick = {
                             viewModel.updateOrderStatus(order.id, 4)

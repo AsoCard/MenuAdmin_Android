@@ -44,6 +44,9 @@ fun OrdersScreen(
     LaunchedEffect(key1 = orderStatus) {
         viewModel.tryLoginIfTokenNotExist(orderStatus)
     }
+//    LaunchedEffect(Unit) {
+//        viewModel.getOrders(orderStatus)
+//    }
     when (ordersState.value) {
         is ApiState.Loading -> {
             IconButton(onClick = { /*TODO*/ }) {

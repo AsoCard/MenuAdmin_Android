@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -31,9 +33,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,7 +64,7 @@ import kotlinx.coroutines.launch
 fun AddMenuItemScreen(
     viewModel: AddMenuItemViewModel = hiltViewModel(),
     onUpPress: () -> Unit,
-    productId: Long
+    productId: Long,
 ) {
     val state by viewModel.state.collectAsState()
     val focusRequesters = remember { List(7) { FocusRequester() } }
@@ -100,48 +102,36 @@ fun AddMenuItemScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        AddMenuItemInputField(
-            label = "عنوان اصلی",
+        AddMenuItemInputField(label = "عنوان اصلی",
             value = state.title,
             onValueChange = { viewModel.handleEvent(AddMenuItemEvent.TitleChanged(it)) },
             modifier = Modifier.focusRequester(focusRequesters[0]),
-            onNext = { focusRequesters[1].requestFocus() }
-        )
-        AddMenuItemInputField(
-            label = "عنوان فرعی",
+            onNext = { focusRequesters[1].requestFocus() })
+        AddMenuItemInputField(label = "عنوان فرعی",
             value = state.subtitle,
             onValueChange = { viewModel.handleEvent(AddMenuItemEvent.SubtitleChanged(it)) },
             modifier = Modifier.focusRequester(focusRequesters[1]),
-            onNext = { focusRequesters[2].requestFocus() }
-        )
-        AddMenuItemInputField(
-            label = "توضیحات",
+            onNext = { focusRequesters[2].requestFocus() })
+        AddMenuItemInputField(label = "توضیحات",
             value = state.description,
             onValueChange = { viewModel.handleEvent(AddMenuItemEvent.DescriptionChanged(it)) },
             modifier = Modifier.focusRequester(focusRequesters[2]),
-            onNext = { focusRequesters[3].requestFocus() }
-        )
-        AddMenuItemInputField(
-            label = "مواد لازم",
+            onNext = { focusRequesters[3].requestFocus() })
+        AddMenuItemInputField(label = "مواد لازم",
             value = state.ingredients,
             onValueChange = { viewModel.handleEvent(AddMenuItemEvent.IngredientsChanged(it)) },
             modifier = Modifier.focusRequester(focusRequesters[3]),
-            onNext = { focusRequesters[4].requestFocus() }
-        )
-        AddMenuItemInputField(
-            label = "طرز تهیه",
+            onNext = { focusRequesters[4].requestFocus() })
+        AddMenuItemInputField(label = "طرز تهیه",
             value = state.preparationMethod,
             onValueChange = { viewModel.handleEvent(AddMenuItemEvent.PreparationMethodChanged(it)) },
             modifier = Modifier.focusRequester(focusRequesters[4]),
-            onNext = { focusRequesters[5].requestFocus() }
-        )
-        AddMenuItemInputField(
-            label = "نحوه سرو کردن",
+            onNext = { focusRequesters[5].requestFocus() })
+        AddMenuItemInputField(label = "نحوه سرو کردن",
             value = state.servingMethod,
             onValueChange = { viewModel.handleEvent(AddMenuItemEvent.ServingMethodChanged(it)) },
             modifier = Modifier.focusRequester(focusRequesters[5]),
-            onNext = { focusRequesters[6].requestFocus() }
-        )
+            onNext = { focusRequesters[6].requestFocus() })
         AddMenuItemInputField(
             label = "قیمت",
             value = state.price.toString(),
@@ -154,18 +144,18 @@ fun AddMenuItemScreen(
             isPriceField = true
         )
 
-        AddCategoryDropdown(
-            selectedCategory = state.category,
-            onCategorySelected = { viewModel.handleEvent(AddMenuItemEvent.CategoryChanged(it)) }
-        )
+        AddCategoryDropdown(selectedCategory = state.category,
+            onCategorySelected = { viewModel.handleEvent(AddMenuItemEvent.CategoryChanged(it)) })
 
-        AddImageSection(label = "افزودن تصویر اصلی",
+        AddImageSection(
+            label = "افزودن تصویر اصلی",
             imageBitmap = state.mainImage,
             onImageClick = { galleryLauncherMain.launch("image/*") },
             uploadState = state.mainImageUploadState
         )
 
-        AddImageSection(label = "افزودن تصویر برای ایده",
+        AddImageSection(
+            label = "افزودن تصویر برای ایده",
             imageBitmap = state.ideaImage,
             onImageClick = { galleryLauncherIdea.launch("image/*") },
             uploadState = state.ideaImageUploadState
@@ -176,11 +166,14 @@ fun AddMenuItemScreen(
 //            onVideoClick = { galleryLauncherVideo.launch("video/*") })
 
         Button(
+//            colors = ButtonDefaults.buttonColors().copy(containerColor = LightBeige),
             onClick = {
                 viewModel.handleEvent(AddMenuItemEvent.Submit)
                 onUpPress.invoke()
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            }, modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth().padding(vertical = 16.dp)
+                .height(70.dp)
         ) {
             Text(text = "ثبت آیتم منو")
         }
@@ -196,7 +189,7 @@ fun AddMenuItemInputField(
     modifier: Modifier = Modifier,
     onNext: () -> Unit = {},
     onDone: () -> Unit = {},
-    isPriceField: Boolean = false
+    isPriceField: Boolean = false,
 ) {
     var errorMessage by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -222,28 +215,65 @@ fun AddMenuItemInputField(
                 onValueChange(it)
             }
         },
-        label = { Text(label) },
+        label = { Text(label, color = LightBeige) },
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
-        singleLine = true,
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = LightBeige),
+        singleLine = false,
         isError = errorMessage.isNotEmpty(),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            cursorColor = Color.White,
-            focusedBorderColor = Color.White,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = LightBeige,
+            unfocusedTextColor = LightBeige,
+            disabledTextColor = LightBeige.copy(alpha = 0.6f),
+            errorTextColor = Color.Red,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            errorContainerColor = Color.Transparent,
+            cursorColor = LightBeige,
+            errorCursorColor = Color.Red,
+            selectionColors = TextSelectionColors(
+                handleColor = LightBeige, backgroundColor = LightBeige.copy(alpha = 0.4f)
+            ),
+            focusedBorderColor = LightBeige,
             unfocusedBorderColor = Color.Gray,
+            disabledBorderColor = Color.Gray.copy(alpha = 0.6f),
             errorBorderColor = Color.Red,
-            errorCursorColor = Color.Red
+            focusedLeadingIconColor = LightBeige,
+            unfocusedLeadingIconColor = LightBeige,
+            disabledLeadingIconColor = LightBeige.copy(alpha = 0.6f),
+            errorLeadingIconColor = Color.Red,
+            focusedTrailingIconColor = LightBeige,
+            unfocusedTrailingIconColor = LightBeige,
+            disabledTrailingIconColor = LightBeige.copy(alpha = 0.6f),
+            errorTrailingIconColor = Color.Red,
+            focusedLabelColor = LightBeige,
+            unfocusedLabelColor = LightBeige,
+            disabledLabelColor = LightBeige.copy(alpha = 0.6f),
+            errorLabelColor = Color.Red,
+            focusedPlaceholderColor = LightBeige.copy(alpha = 0.6f),
+            unfocusedPlaceholderColor = LightBeige.copy(alpha = 0.6f),
+            disabledPlaceholderColor = LightBeige.copy(alpha = 0.3f),
+            errorPlaceholderColor = Color.Red,
+            focusedSupportingTextColor = LightBeige,
+            unfocusedSupportingTextColor = LightBeige,
+            disabledSupportingTextColor = LightBeige.copy(alpha = 0.6f),
+            errorSupportingTextColor = Color.Red,
+            focusedPrefixColor = LightBeige,
+            unfocusedPrefixColor = LightBeige,
+            disabledPrefixColor = LightBeige.copy(alpha = 0.6f),
+            errorPrefixColor = Color.Red,
+            focusedSuffixColor = LightBeige,
+            unfocusedSuffixColor = LightBeige,
+            disabledSuffixColor = LightBeige.copy(alpha = 0.6f),
+            errorSuffixColor = Color.Red,
         ),
-        keyboardActions = KeyboardActions(
-            onNext = {
-                scope.launch { onNext() }
-            },
-            onDone = {
-                scope.launch { onDone() }
-            }
-        ),
+        keyboardActions = KeyboardActions(onNext = {
+            scope.launch { onNext() }
+        }, onDone = {
+            scope.launch { onDone() }
+        }),
         keyboardOptions = KeyboardOptions().copy(
             imeAction = if (onNext != {}) ImeAction.Next else ImeAction.Done
         )
@@ -260,6 +290,7 @@ fun AddMenuItemInputField(
 
 
 
+
 @Composable
 fun AddCategoryDropdown(selectedCategory: Int, onCategorySelected: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
@@ -268,31 +299,37 @@ fun AddCategoryDropdown(selectedCategory: Int, onCategorySelected: (Int) -> Unit
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .height(70.dp)
             .padding(vertical = 8.dp)
     ) {
-        Surface(
-            onClick = { expanded = !expanded },
+        Surface(onClick = { expanded = !expanded },
             shape = MaterialTheme.shapes.small,
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded }
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
+                .fillMaxSize()
+                .clickable { expanded = !expanded }) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
             ) {
                 Text(
-                    text = if (selectedCategory == -1) { "دسته بندی" } else categories[selectedCategory],
-                    color = if (selectedCategory== -1) Color.Gray else MaterialTheme.colorScheme.onSurface,
+                    text = if (selectedCategory == -1) {
+                        "دسته بندی"
+                    } else categories[selectedCategory],
+                    color = if (selectedCategory == -1) Color.Gray else MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
                 )
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                Icon(imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                     contentDescription = null,
-                    modifier = Modifier.clickable { expanded = !expanded }
+                    modifier = Modifier
+                        .clickable { expanded = !expanded }
+                        .padding(horizontal = 16.dp)
                 )
             }
         }
@@ -302,16 +339,14 @@ fun AddCategoryDropdown(selectedCategory: Int, onCategorySelected: (Int) -> Unit
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            categories.forEachIndexed { index,category ->
-                DropdownMenuItem(
-                    text = { Text(text = category) },
-                    onClick = {
-                        // ADDED BY 3 TO MATCH SERVER IDS OF CATEGORY
-                        onCategorySelected(index)
-                        expanded = false
-                    }, modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+            categories.forEachIndexed { index, category ->
+                DropdownMenuItem(text = { Text(text = category) }, onClick = {
+                    // ADDED BY 3 TO MATCH SERVER IDS OF CATEGORY
+                    onCategorySelected(index)
+                    expanded = false
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                 )
             }
         }
@@ -323,7 +358,7 @@ fun AddImageSection(
     label: String,
     imageBitmap: Bitmap?,
     onImageClick: () -> Unit,
-    uploadState: ApiState<ImageUploadResponse>
+    uploadState: ApiState<ImageUploadResponse>,
 ) {
     Column(
         modifier = Modifier
@@ -374,8 +409,7 @@ fun AddVideoSection(label: String, videoUri: Uri?, onVideoClick: () -> Unit) {
                 .fillMaxWidth()
                 .height(200.dp)
                 .background(Color.Gray)
-                .clickable { onVideoClick() },
-            contentAlignment = Alignment.Center
+                .clickable { onVideoClick() }, contentAlignment = Alignment.Center
         ) {
             if (videoUri != null) {
                 Text(text = "Video selected", color = Color.White)
